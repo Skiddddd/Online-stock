@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gabby Invest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --bg-base: #030712;
+      --bg-surface: #0b1220;
+      --line: rgba(148, 163, 184, 0.2);
+      --text-soft: #94a3b8;
+      --brand-a: #38bdf8;
+      --brand-b: #34d399;
+    }
+    body {
+      position: relative;
+      overflow-x: hidden;
+      background:
+        linear-gradient(rgba(3, 7, 18, 0.48), rgba(3, 7, 18, 0.48)),
+        url("./assets/investment-bg.png") center / cover no-repeat fixed,
+        radial-gradient(900px 520px at -8% -5%, rgba(56, 189, 248, 0.18), transparent 55%),
+        radial-gradient(780px 460px at 105% 110%, rgba(52, 211, 153, 0.16), transparent 58%),
+        var(--bg-base);
+      color: #e2e8f0;
+      font-family: "Manrope", system-ui, sans-serif;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: radial-gradient(circle at center, black 35%, transparent 100%);
+      pointer-events: none;
+      opacity: 0.12;
+      z-index: 0;
+    }
+    h1, h2, h3, .brand-font {
+      font-family: "Space Grotesk", "Manrope", system-ui, sans-serif;
+      letter-spacing: -0.02em;
+    }
+    .glass {
+      background: linear-gradient(160deg, rgba(15, 23, 42, 0.62), rgba(7, 11, 24, 0.5));
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 36px rgba(2, 6, 23, 0.35);
+    }
+    .brand-title {
+      background: linear-gradient(95deg, var(--brand-a), var(--brand-b));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .input-luxe {
+      background: rgba(9, 14, 28, 0.56);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    }
+    .input-luxe:focus {
+      outline: none;
+      border-color: rgba(56, 189, 248, 0.7);
+      box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.14);
+      transform: translateY(-1px);
+    }
+    .surface-chip {
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+    @keyframes driftA {
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(20px, -20px, 0) scale(1.05); }
+    }
+    @keyframes driftB {
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(-24px, 22px, 0) scale(1.04); }
+    }
+    @keyframes pageIn {
+      0% { opacity: 0; transform: translateY(14px) scale(0.99); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes itemIn {
+      0% { opacity: 0; transform: translateY(16px) scale(0.99); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .ambient-blob {
+      position: fixed;
+      border-radius: 9999px;
+      filter: blur(80px);
+      z-index: 0;
+      pointer-events: none;
+    }
+    .blob-a {
+      width: 280px;
+      height: 280px;
+      top: -70px;
+      left: -50px;
+      background: rgba(37, 99, 235, 0.2);
+      animation: driftA 9s ease-in-out infinite;
+    }
+    .blob-b {
+      width: 320px;
+      height: 320px;
+      right: -80px;
+      bottom: -90px;
+      background: rgba(16, 185, 129, 0.18);
+      animation: driftB 11s ease-in-out infinite;
+    }
+    .page-motion {
+      animation: pageIn 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .motion-item {
+      opacity: 0;
+      animation: itemIn 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .scene {
+      perspective: 1200px;
+      transform-style: preserve-3d;
+    }
+    .tilt-card {
+      transform-style: preserve-3d;
+      transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+      will-change: transform;
+    }
+    .tilt-card:hover {
+      box-shadow: 0 20px 45px rgba(2, 6, 23, 0.55), 0 6px 18px rgba(37, 99, 235, 0.2);
+      border-color: rgba(59, 130, 246, 0.45);
+    }
+    .depth-layer {
+      transform: translateZ(24px);
+    }
+    .btn-3d {
+      transform: translateZ(0);
+      transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+    .btn-3d:hover {
+      transform: translateY(-2px) translateZ(8px);
+      box-shadow: 0 14px 24px rgba(15, 23, 42, 0.45);
+      filter: brightness(1.04);
+    }
+    .btn-3d:active {
+      transform: translateY(1px) scale(0.99);
+      box-shadow: 0 6px 12px rgba(15, 23, 42, 0.35);
+    }
+    .tabBtn {
+      border: 1px solid transparent;
+    }
+    .tabBtn:hover {
+      border-color: rgba(56, 189, 248, 0.2);
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <div class="ambient-blob blob-a"></div>
+  <div class="ambient-blob blob-b"></div>
+  <div id="app"></div>
+
+  <script>
+    const DB_KEY = "nexus_static_db_v1";
+    const API_BASE = "http://localhost:4000";
+
+    const DEFAULT_STATE = {
+      currentUserId: null,
+      users: [
+        {
+          id: "admin-1",
+          email: "admin@nexus.io",
+          password: "Admin@123",
+          fullName: "Gabby Admin",
+          balance: 1000000,
+          role: "ADMIN",
+          createdAt: new Date().toISOString()
+        }
+      ],
+      transactions: [],
+      plans: [
+        { id: "plan-1", name: "BTC Core Income", minAmount: 250, maxAmount: 5000, dailyRoi: 0.18, durationDays: 30, risk: "Low", strategy: "Market-neutral BTC basis and hedged carry." },
+        { id: "plan-2", name: "Blue Chip Momentum", minAmount: 5000, maxAmount: 25000, dailyRoi: 0.26, durationDays: 60, risk: "Medium", strategy: "Rotational exposure across BTC, ETH, and large-cap alts." },
+        { id: "plan-3", name: "Opportunistic Alpha", minAmount: 25000, maxAmount: 250000, dailyRoi: 0.34, durationDays: 90, risk: "High", strategy: "Actively managed swing allocation with strict drawdown controls." }
+      ],
+      systemConfig: {
+        btcAddress: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
+        ethAddress: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
+        usdtAddress: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F"
+      }
+    };
+
+    let activeTab = "dashboard";
+    let isRegistering = false;
+
+    const readState = () => {
+      const raw = localStorage.getItem(DB_KEY);
+      if (!raw) {
+        localStorage.setItem(DB_KEY, JSON.stringify(DEFAULT_STATE));
+        return structuredClone(DEFAULT_STATE);
+      }
+      try {
+        const parsed = JSON.parse(raw);
+        const migrated = {
+          ...DEFAULT_STATE,
+          ...parsed,
+          users: (Array.isArray(parsed.users) ? parsed.users : DEFAULT_STATE.users).map((u) => ({
+            ...u,
+            password: u.password || (u.email === "admin@nexus.io" ? "Admin@123" : "User@123")
+          }))
+        };
+        localStorage.setItem(DB_KEY, JSON.stringify(migrated));
+        return migrated;
+      } catch {
+        localStorage.setItem(DB_KEY, JSON.stringify(DEFAULT_STATE));
+        return structuredClone(DEFAULT_STATE);
+      }
+    };
+
+    const writeState = (state) => localStorage.setItem(DB_KEY, JSON.stringify(state));
+    const uid = () => Math.random().toString(36).slice(2, 11);
+    const money = (n) => "$" + Number(n).toLocaleString();
+
+    function currentUser(state) {
+      return state.users.find(u => u.id === state.currentUserId) || null;
+    }
+
+    function createTx(state, userId, type, amount, method) {
+      const user = state.users.find(u => u.id === userId);
+      if (!user) return;
+      state.transactions.unshift({
+        id: uid(),
+        userId,
+        userEmail: user.email,
+        type,
+        amount: Number(amount),
+        status: "PENDING",
+        date: new Date().toISOString(),
+        method
+      });
+    }
+
+    function renderAuth(state) {
+      const app = document.getElementById("app");
+      app.innerHTML = `
+        <div class="min-h-screen flex items-center justify-center p-6 relative z-10 page-motion">
+          <div class="w-full max-w-md scene">
+            <div class="text-center mb-8">
+              <h1 class="text-5xl font-extrabold brand-title">GABBY INVEST</h1>
+              <p class="text-slate-300 mt-2 tracking-wide">Institutional Grade Crypto Investing</p>
+            </div>
+            <div class="glass border border-slate-800 rounded-3xl p-8 tilt-card">
+              <h2 class="text-2xl font-bold mb-6 text-center depth-layer">${isRegistering ? "Create Account" : "Welcome Back"}</h2>
+              <form id="authForm" class="space-y-4">
+                ${isRegistering ? `
+                <div>
+                  <label class="block text-sm text-slate-400 mb-2">Full Name</label>
+                  <input id="name" required class="input-luxe w-full rounded-xl px-4 py-3" placeholder="John Doe" />
+                </div>` : ""}
+                <div>
+                  <label class="block text-sm text-slate-400 mb-2">Email Address</label>
+                  <input id="email" type="email" required class="input-luxe w-full rounded-xl px-4 py-3" placeholder="name@company.com" />
+                </div>
+                <div>
+                  <label class="block text-sm text-slate-400 mb-2">Password</label>
+                  <div class="relative">
+                    <input id="password" type="password" required class="input-luxe w-full rounded-xl px-4 pr-12 py-3" placeholder="${isRegistering ? "Create a password" : "Enter your password"}" />
+                    <button
+                      id="togglePassword"
+                      type="button"
+                      class="absolute inset-y-0 right-0 px-3 text-slate-400 hover:text-blue-300 transition-colors"
+                      aria-label="Show password"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <button class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl btn-3d tracking-wide">
+                  ${isRegistering ? "Start Investing" : "Login Dashboard"}
+                </button>
+              </form>
+              <button id="toggleAuth" class="mt-4 text-sm text-slate-400 hover:text-blue-400 w-full">
+                ${isRegistering ? "Already have an account? Login" : "Don't have an account? Sign up"}
+              </button>
+              ${!isRegistering ? `<button id="forgotPassword" class="mt-2 text-sm text-slate-500 hover:text-emerald-300 w-full">Forgot Password?</button>` : ""}
+            </div>
+            <div class="mt-6 text-center text-xs text-slate-500">
+              <p class="surface-chip inline-block px-3 py-1 rounded-full">Admin: admin@nexus.io / Admin@123</p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("toggleAuth").onclick = () => {
+        isRegistering = !isRegistering;
+        render();
+      };
+
+      const passwordInput = document.getElementById("password");
+      const togglePasswordBtn = document.getElementById("togglePassword");
+      if (passwordInput && togglePasswordBtn) {
+        const visibleIcon = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-6.4 0-10-7-10-7a21.9 21.9 0 0 1 5.06-5.94"></path>
+            <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c6.4 0 10 7 10 7a21.92 21.92 0 0 1-3.18 4.28"></path>
+            <path d="m1 1 22 22"></path>
+            <path d="M10.58 10.58A2 2 0 0 0 12 14a2 2 0 0 0 1.42-.58"></path>
+          </svg>
+        `;
+        const hiddenIcon = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        `;
+        const syncPasswordToggle = () => {
+          const isHidden = passwordInput.type === "password";
+          togglePasswordBtn.setAttribute("aria-label", isHidden ? "Show password" : "Hide password");
+          togglePasswordBtn.innerHTML = isHidden ? hiddenIcon : visibleIcon;
+        };
+        togglePasswordBtn.onclick = () => {
+          passwordInput.type = passwordInput.type === "password" ? "text" : "password";
+          syncPasswordToggle();
+          passwordInput.focus();
+          const valueLength = passwordInput.value.length;
+          passwordInput.setSelectionRange(valueLength, valueLength);
+        };
+        syncPasswordToggle();
+      }
+
+      const forgotPasswordBtn = document.getElementById("forgotPassword");
+      if (forgotPasswordBtn) {
+        forgotPasswordBtn.onclick = async () => {
+          const email = (prompt("Enter your account email:") || "").trim().toLowerCase();
+          if (!email) return;
+          try {
+            const res = await fetch(`${API_BASE}/api/auth/forgot-password`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email })
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+              alert(data.error || "Could not process reset request.");
+              return;
+            }
+            alert("If the account exists, a reset link has been sent to your email.");
+          } catch {
+            alert("Password reset service unavailable. Ensure backend is running on http://localhost:4000.");
+          }
+        };
+      }
+
+      document.getElementById("authForm").onsubmit = (e) => {
+        e.preventDefault();
+        const email = document.getElementById("email").value.trim().toLowerCase();
+        const password = document.getElementById("password").value;
+        const db = readState();
+        if (!email || !password) return;
+
+        if (isRegistering) {
+          const fullName = document.getElementById("name").value.trim();
+          if (!fullName) return;
+          if (password.length < 6) {
+            alert("Password must be at least 6 characters.");
+            return;
+          }
+          if (db.users.some((u) => (u.email || "").toLowerCase() === email)) {
+            alert("User already exists. Please login.");
+            return;
+          }
+          db.users.push({
+            id: uid(),
+            email,
+            password,
+            fullName,
+            balance: 0,
+            role: "USER",
+            createdAt: new Date().toISOString()
+          });
+          db.currentUserId = db.users[db.users.length - 1].id;
+          writeState(db);
+          render();
+          return;
+        }
+
+        const user = db.users.find((u) => (u.email || "").toLowerCase() === email && u.password === password);
+        if (!user) {
+          alert("Invalid email or password.");
+          return;
+        }
+        db.currentUserId = user.id;
+        writeState(db);
+        render();
+      };
+
+      initMotionEffects();
+    }
+
+    function renderDashboard(user, txs) {
+      const myTx = txs.filter(t => t.userId === user.id).slice(0, 6);
+      return `
+        <div class="space-y-6 scene">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="glass border border-slate-800 rounded-2xl p-6 md:col-span-2 tilt-card">
+              <p class="text-slate-400 mb-2">Total Portfolio Value</p>
+              <p class="text-4xl font-bold depth-layer">${money(user.balance)}</p>
+              <p class="text-emerald-400 text-sm mt-2">+12.5% this month</p>
+            </div>
+            <div class="glass border border-slate-800 rounded-2xl p-6 tilt-card">
+              <p class="text-slate-400 mb-2">AI Market Sentiment</p>
+              <p class="text-sm text-slate-300">Market momentum remains constructive for BTC and ETH, while selective altcoin exposure is favored.</p>
+            </div>
+          </div>
+          <div class="glass border border-slate-800 rounded-2xl p-6 tilt-card">
+            <h3 class="font-bold mb-4">Recent Transactions</h3>
+            <div class="space-y-2">
+              ${myTx.length ? myTx.map(t => `
+                <div class="flex justify-between bg-slate-900/35 rounded-xl px-4 py-3">
+                  <span>${t.type}</span>
+                  <span>${money(t.amount)} | ${t.status}</span>
+                </div>
+              `).join("") : `<p class="text-slate-500">No transactions yet.</p>`}
+            </div>
+          </div>
+          <div class="glass border border-slate-800 rounded-2xl p-4 tilt-card">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-bold">Live BTC/USDT Chart</h3>
+              <span class="text-xs text-slate-400">Source: TradingView</span>
+            </div>
+            <div id="liveChartBox" class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <div id="liveChartStatus" class="h-[420px] flex items-center justify-center text-slate-500 text-sm">
+                Loading chart...
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function renderLiveChart() {
+      const host = document.getElementById("liveChartBox");
+      if (!host) return;
+      const renderTradingView = () => {
+        host.innerHTML = `
+          <iframe
+            title="BTCUSDT Chart"
+            class="w-full"
+            style="height:420px;border:0;"
+            src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_btc&symbol=BINANCE:BTCUSDT&interval=60&hidesidetoolbar=1&symboledit=0&saveimage=0&toolbarbg=0f172a&studies=%5B%5D&theme=dark&style=1&timezone=Etc%2FUTC&locale=en"
+            allowtransparency="true"
+            scrolling="no"
+            allowfullscreen
+          ></iframe>
+        `;
+      };
+
+      const renderFallback = async () => {
+        try {
+          const res = await fetch("https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=3&interval=hourly");
+          if (!res.ok) throw new Error("fallback failed");
+          const payload = await res.json();
+          const points = Array.isArray(payload?.prices) ? payload.prices.slice(-72) : [];
+          const values = points.map((p) => Number(p[1])).filter((v) => Number.isFinite(v));
+          if (!values.length) throw new Error("no data");
+
+          const min = Math.min(...values);
+          const max = Math.max(...values);
+          const range = max - min || 1;
+          const width = 920;
+          const height = 420;
+          const pad = 22;
+          const path = values.map((value, idx) => {
+            const x = pad + (idx * (width - pad * 2)) / Math.max(1, values.length - 1);
+            const y = height - pad - ((value - min) / range) * (height - pad * 2);
+            return `${idx === 0 ? "M" : "L"}${x.toFixed(2)} ${y.toFixed(2)}`;
+          }).join(" ");
+          const last = values[values.length - 1];
+
+          host.innerHTML = `
+            <div class="px-3 py-2 text-xs text-amber-400 border-b border-slate-800">TradingView blocked on this network. Showing fallback feed.</div>
+            <svg viewBox="0 0 ${width} ${height}" class="w-full" style="height:360px" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#34d399" stop-opacity="0.9"></stop>
+                  <stop offset="100%" stop-color="#22c55e" stop-opacity="0.35"></stop>
+                </linearGradient>
+              </defs>
+              <path d="${path}" fill="none" stroke="url(#lineGrad)" stroke-width="3" stroke-linecap="round"></path>
+            </svg>
+            <div class="px-3 py-2 text-sm text-emerald-400 border-t border-slate-800">BTC: $${last.toLocaleString()}</div>
+          `;
+        } catch {
+          host.innerHTML = `<div class="h-[420px] flex items-center justify-center text-red-400 text-sm text-center px-4">Live chart unavailable. Network is blocking market providers.</div>`;
+        }
+      };
+
+      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 4500));
+      try {
+        await Promise.race([
+          fetch("https://s.tradingview.com/favicon.ico", { mode: "no-cors", cache: "no-store" }),
+          timeout
+        ]);
+        renderTradingView();
+      } catch {
+        await renderFallback();
+      }
+    }
+
+    function renderInvest(state, user) {
+      return `
+        <div class="space-y-6 scene">
+          <div>
+            <h2 class="text-3xl font-bold">Investment Products</h2>
+            <p class="text-slate-400 mt-2 text-sm">Projected returns are estimates, not guarantees. Capital remains exposed to market risk.</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            ${state.plans.map(p => `
+              <div class="glass border border-slate-800 rounded-2xl p-6 tilt-card">
+                <h3 class="text-xl font-bold mb-2">${p.name}</h3>
+                <p class="text-blue-400 font-bold text-2xl">${p.dailyRoi}% <span class="text-sm text-slate-400 font-normal">Target Daily Yield</span></p>
+                <div class="mt-4 space-y-1 text-sm">
+                  <p class="text-slate-300"><span class="text-slate-500">Min:</span> ${money(p.minAmount)}</p>
+                  <p class="text-slate-300"><span class="text-slate-500">Max:</span> ${money(p.maxAmount)}</p>
+                  <p class="text-slate-300"><span class="text-slate-500">Lock Period:</span> ${p.durationDays} days</p>
+                  <p class="text-slate-300"><span class="text-slate-500">Risk:</span> ${p.risk}</p>
+                </div>
+                <p class="text-xs text-slate-500 mt-4 mb-4">${p.strategy}</p>
+                <button class="investBtn btn-3d w-full bg-blue-600 hover:bg-blue-500 py-2 rounded-lg font-bold" data-plan="${p.id}">Invest</button>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderWallet(state) {
+      return `
+        <div class="space-y-6 scene">
+          <h2 class="text-3xl font-bold">Funding & Wallet</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="glass border border-slate-800 rounded-2xl p-6 tilt-card">
+              <h3 class="font-bold mb-3">Deposit Addresses</h3>
+              <div class="bg-slate-900/45 border border-slate-800 rounded-xl p-3 mb-3">
+                <div class="flex items-center gap-2 mb-2">
+                  <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040" alt="Bitcoin" class="w-5 h-5" />
+                  <p class="text-xs text-slate-400">BTC</p>
+                </div>
+                <code class="block bg-slate-950 p-2 rounded text-xs break-all">${state.systemConfig.btcAddress}</code>
+              </div>
+              <div class="bg-slate-900/45 border border-slate-800 rounded-xl p-3 mb-3">
+                <div class="flex items-center gap-2 mb-2">
+                  <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png?v=040" alt="Ethereum" class="w-5 h-5" />
+                  <p class="text-xs text-slate-400">ETH</p>
+                </div>
+                <code class="block bg-slate-950 p-2 rounded text-xs break-all">${state.systemConfig.ethAddress}</code>
+              </div>
+              <div class="bg-slate-900/45 border border-slate-800 rounded-xl p-3">
+                <div class="flex items-center gap-2 mb-2">
+                  <img src="https://cryptologos.cc/logos/tether-usdt-logo.png?v=040" alt="Tether USDT" class="w-5 h-5" />
+                  <p class="text-xs text-slate-400">USDT</p>
+                </div>
+                <code class="block bg-slate-950 p-2 rounded text-xs break-all">${state.systemConfig.usdtAddress}</code>
+              </div>
+              <button id="depositBtn" class="mt-6 w-full bg-emerald-600 hover:bg-emerald-500 py-2 rounded-lg font-bold btn-3d">I've Made a Transfer</button>
+            </div>
+            <div class="glass border border-slate-800 rounded-2xl p-6 tilt-card">
+              <h3 class="font-bold mb-3">Withdraw Funds</h3>
+              <p class="text-slate-400 text-sm mb-4">Request a withdrawal to your external wallet.</p>
+              <button id="withdrawBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-2 rounded-lg font-bold btn-3d">Request Withdrawal</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderTransactions(state, user) {
+      const txs = state.transactions.filter(t => t.userId === user.id && t.type === "DEPOSIT");
+      return `
+        <div class="space-y-6 scene">
+          <h2 class="text-3xl font-bold">Deposit History</h2>
+          <div class="glass border border-slate-800 rounded-2xl p-4 tilt-card">
+            ${txs.length ? txs.map(t => `
+              <div class="flex justify-between bg-slate-900/35 rounded-xl px-4 py-3 mb-2">
+                <span>${new Date(t.date).toLocaleDateString()} | ${t.method}</span>
+                <span>${money(t.amount)} | ${t.status}</span>
+              </div>
+            `).join("") : `<p class="text-slate-500">No deposits found.</p>`}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAdmin(state, view) {
+      if (view === "users") {
+        return `
+          <div class="space-y-6 scene">
+            <h2 class="text-3xl font-bold">User Management</h2>
+            <div class="glass border border-slate-800 rounded-2xl p-4 tilt-card">
+              ${state.users.map(u => `
+                <div class="flex justify-between bg-slate-900/35 rounded-xl px-4 py-3 mb-2">
+                  <span>${u.fullName} (${u.role})</span>
+                  <span>${u.email} | ${money(u.balance)}</span>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      }
+
+      if (view === "settings") {
+        return `
+          <div class="space-y-6 max-w-2xl scene">
+            <h2 class="text-3xl font-bold">System Settings</h2>
+            <div class="glass border border-slate-800 rounded-2xl p-6 space-y-4 tilt-card">
+              <div class="bg-slate-900/45 border border-slate-800 rounded-xl p-3">
+                <div class="flex items-center gap-2 mb-2">
+                  <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040" alt="Bitcoin" class="w-5 h-5" />
+                  <label for="btcInput" class="text-sm text-slate-300 font-medium">BTC Wallet Address</label>
+                </div>
+                <input id="btcInput" class="w-full bg-slate-900/60 border border-slate-700 rounded-lg p-3 text-sm" value="${state.systemConfig.btcAddress}" />
+              </div>
+              <div class="bg-slate-900/45 border border-slate-800 rounded-xl p-3">
+                <div class="flex items-center gap-2 mb-2">
+                  <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png?v=040" alt="Ethereum" class="w-5 h-5" />
+                  <label for="ethInput" class="text-sm text-slate-300 font-medium">ETH Wallet Address</label>
+                </div>
+                <input id="ethInput" class="w-full bg-slate-900/60 border border-slate-700 rounded-lg p-3 text-sm" value="${state.systemConfig.ethAddress}" />
+              </div>
+              <div class="bg-slate-900/45 border border-slate-800 rounded-xl p-3">
+                <div class="flex items-center gap-2 mb-2">
+                  <img src="https://cryptologos.cc/logos/tether-usdt-logo.png?v=040" alt="Tether USDT" class="w-5 h-5" />
+                  <label for="usdtInput" class="text-sm text-slate-300 font-medium">USDT Wallet Address</label>
+                </div>
+                <input id="usdtInput" class="w-full bg-slate-900/60 border border-slate-700 rounded-lg p-3 text-sm" value="${state.systemConfig.usdtAddress}" />
+              </div>
+              <button id="saveConfig" class="w-full bg-blue-600 hover:bg-blue-500 py-2 rounded-lg font-bold btn-3d">Save Changes</button>
+            </div>
+          </div>
+        `;
+      }
+
+      const pending = state.transactions.filter(t => t.status === "PENDING");
+      return `
+        <div class="space-y-6 scene">
+          <h2 class="text-3xl font-bold">${view === "tx" ? "Approve Payments" : "System Overview"}</h2>
+          <div class="glass border border-slate-800 rounded-2xl p-4 tilt-card">
+            <p class="text-slate-400 mb-4">Pending Requests: ${pending.length}</p>
+            ${pending.length ? pending.map(t => `
+              <div class="bg-slate-900/35 rounded-xl px-4 py-3 mb-2">
+                <div class="flex justify-between">
+                  <span>${t.userEmail} | ${t.type} | ${money(t.amount)}</span>
+                  <div class="space-x-2">
+                    <button class="approveBtn btn-3d bg-emerald-600 px-3 py-1 rounded text-sm" data-id="${t.id}">Approve</button>
+                    <button class="rejectBtn btn-3d bg-red-600 px-3 py-1 rounded text-sm" data-id="${t.id}">Reject</button>
+                  </div>
+                </div>
+              </div>
+            `).join("") : `<p class="text-slate-500">Everything is up to date.</p>`}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderMain(state, user) {
+      const isAdmin = user.role === "ADMIN";
+      const userItems = [
+        ["dashboard", "Dashboard"],
+        ["invest", "Invest"],
+        ["transactions", "Transactions"],
+        ["wallet", "Wallet"]
+      ];
+      const adminItems = [
+        ["admin-overview", "System Overview"],
+        ["admin-users", "Manage Users"],
+        ["admin-tx", "Approve Payments"],
+        ["admin-settings", "Settings"]
+      ];
+      const items = isAdmin
+        ? [...userItems.filter(i => i[0] !== "invest" && i[0] !== "wallet"), ...adminItems]
+        : userItems;
+
+      let content = "";
+      if (activeTab === "dashboard") content = renderDashboard(user, state.transactions);
+      else if (activeTab === "invest") content = renderInvest(state, user);
+      else if (activeTab === "wallet") content = renderWallet(state);
+      else if (activeTab === "transactions") content = renderTransactions(state, user);
+      else if (isAdmin && activeTab === "admin-overview") content = renderAdmin(state, "overview");
+      else if (isAdmin && activeTab === "admin-users") content = renderAdmin(state, "users");
+      else if (isAdmin && activeTab === "admin-tx") content = renderAdmin(state, "tx");
+      else if (isAdmin && activeTab === "admin-settings") content = renderAdmin(state, "settings");
+      else content = renderDashboard(user, state.transactions);
+
+      const app = document.getElementById("app");
+      app.innerHTML = `
+        <div class="flex min-h-screen relative z-10">
+          <aside class="hidden md:flex w-64 flex-col glass border-r border-slate-800 p-4 scene">
+            <h1 class="text-xl font-extrabold px-2 py-4 brand-title brand-font">GABBY INVEST</h1>
+          <div class="space-y-1 mt-4">
+              ${items.map(([id, label]) => `
+                <button class="tabBtn btn-3d w-full text-left px-3 py-2 rounded-lg ${id === activeTab ? "bg-blue-600/30 text-blue-200 border-blue-400/35" : "hover:bg-slate-800/70 text-slate-300"}" data-tab="${id}">${label}</button>
+              `).join("")}
+            </div>
+            <div class="mt-auto pt-6">
+              <div class="text-sm text-slate-300 mb-3">${user.fullName}</div>
+              <button class="logoutBtn w-full bg-red-600/80 hover:bg-red-600 py-2 rounded-lg btn-3d">Logout</button>
+            </div>
+          </aside>
+          <main class="flex-1 p-4 md:p-8 scene page-motion">
+            <div class="md:hidden glass border border-slate-800 rounded-2xl p-3 mb-4">
+              <div class="flex items-center justify-end gap-2">
+                <div class="flex items-center gap-2">
+                  <button id="mobileMenuBtn" class="btn-3d bg-slate-800/80 hover:bg-slate-700 text-slate-100 px-3 py-2 rounded-lg text-sm border border-slate-600/40" aria-expanded="false" aria-controls="mobileMenuPanel">☰ Menu</button>
+                  <button class="logoutBtn bg-red-600/80 hover:bg-red-600 py-2 px-3 rounded-lg btn-3d text-sm">Logout</button>
+                </div>
+              </div>
+              <div id="mobileMenuPanel" class="hidden mt-3 space-y-2">
+                ${items.map(([id, label]) => `
+                  <button class="tabBtn btn-3d w-full text-left text-sm px-3 py-2 rounded-lg ${id === activeTab ? "bg-blue-600/30 text-blue-200 border-blue-400/35" : "hover:bg-slate-800/70 text-slate-300"}" data-tab="${id}">${label}</button>
+                `).join("")}
+              </div>
+            </div>
+            <header class="glass border border-slate-800 rounded-2xl p-4 mb-6 flex justify-between items-center tilt-card">
+              <span class="text-slate-300">Market Status: <span class="text-emerald-400">Live</span></span>
+              <span class="font-bold depth-layer">${money(user.balance)}</span>
+            </header>
+            ${content}
+          </main>
+        </div>
+      `;
+
+      document.querySelectorAll(".tabBtn").forEach(btn => {
+        btn.onclick = () => { activeTab = btn.dataset.tab; render(); };
+      });
+
+      const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+      const mobileMenuPanel = document.getElementById("mobileMenuPanel");
+      if (mobileMenuBtn && mobileMenuPanel) {
+        mobileMenuBtn.onclick = () => {
+          const isOpen = !mobileMenuPanel.classList.contains("hidden");
+          mobileMenuPanel.classList.toggle("hidden", isOpen);
+          mobileMenuBtn.setAttribute("aria-expanded", String(!isOpen));
+          mobileMenuBtn.textContent = isOpen ? "\u2630 Menu" : "\u2715 Close";
+        };
+      }
+
+      document.querySelectorAll(".logoutBtn").forEach((btn) => {
+        btn.onclick = () => {
+          const db = readState();
+          db.currentUserId = null;
+          writeState(db);
+          activeTab = "dashboard";
+          render();
+        };
+      });
+
+      document.querySelectorAll(".investBtn").forEach(btn => {
+        btn.onclick = () => {
+          const db = readState();
+          const plan = db.plans.find(p => p.id === btn.dataset.plan);
+          const value = Number(prompt(`Enter amount (min ${plan.minAmount}, max ${plan.maxAmount})`, String(plan.minAmount)));
+          if (!value) return;
+          if (value < plan.minAmount || value > plan.maxAmount) {
+            alert("Amount is outside plan limits.");
+            return;
+          }
+          if (value > currentUser(db).balance) {
+            alert("Insufficient balance.");
+            return;
+          }
+          const projectedProfit = Number((value * (plan.dailyRoi / 100) * plan.durationDays).toFixed(2));
+          const projectedPayout = Number((value + projectedProfit).toFixed(2));
+          const confirmText =
+            `Plan: ${plan.name}\n` +
+            `Principal: ${money(value)}\n` +
+            `Lock Period: ${plan.durationDays} days\n` +
+            `Estimated Profit: ${money(projectedProfit)}\n` +
+            `Estimated Payout: ${money(projectedPayout)}\n\n` +
+            `Submit this investment request?`;
+          if (!confirm(confirmText)) return;
+          createTx(db, currentUser(db).id, "INVESTMENT", value, "Investment Wallet");
+          writeState(db);
+          alert("Investment request submitted for admin approval.");
+          render();
+        };
+      });
+
+      const depositBtn = document.getElementById("depositBtn");
+      if (depositBtn) {
+        depositBtn.onclick = () => {
+          const amount = Number(prompt("Enter amount to deposit (USD equivalent):", "5000"));
+          if (!amount || amount <= 0) return;
+          const db = readState();
+          createTx(db, currentUser(db).id, "DEPOSIT", amount, "Crypto Transfer");
+          writeState(db);
+          alert("Deposit request submitted.");
+          render();
+        };
+      }
+
+      const withdrawBtn = document.getElementById("withdrawBtn");
+      if (withdrawBtn) {
+        withdrawBtn.onclick = () => {
+          const db = readState();
+          const userNow = currentUser(db);
+          const amount = Number(prompt(`Available ${money(userNow.balance)}. Enter withdrawal amount:`));
+          if (!amount || amount <= 0) return;
+          if (amount > userNow.balance) {
+            alert("Insufficient balance.");
+            return;
+          }
+          const address = prompt("Enter destination wallet address:");
+          if (!address) return;
+          createTx(db, userNow.id, "WITHDRAWAL", amount, "To: " + address.slice(0, 10) + "...");
+          writeState(db);
+          alert("Withdrawal request submitted.");
+          render();
+        };
+      }
+
+      document.querySelectorAll(".approveBtn").forEach(btn => {
+        btn.onclick = () => {
+          const db = readState();
+          const tx = db.transactions.find(t => t.id === btn.dataset.id);
+          if (!tx || tx.status !== "PENDING") return;
+          tx.status = "COMPLETED";
+          const u = db.users.find(x => x.id === tx.userId);
+          if (u) {
+            if (tx.type === "DEPOSIT") u.balance += tx.amount;
+            if (tx.type === "WITHDRAWAL" || tx.type === "INVESTMENT") u.balance -= tx.amount;
+          }
+          writeState(db);
+          render();
+        };
+      });
+
+      document.querySelectorAll(".rejectBtn").forEach(btn => {
+        btn.onclick = () => {
+          const db = readState();
+          const tx = db.transactions.find(t => t.id === btn.dataset.id);
+          if (!tx || tx.status !== "PENDING") return;
+          tx.status = "REJECTED";
+          writeState(db);
+          render();
+        };
+      });
+
+      const saveConfig = document.getElementById("saveConfig");
+      if (saveConfig) {
+        saveConfig.onclick = () => {
+          const db = readState();
+          db.systemConfig.btcAddress = document.getElementById("btcInput").value.trim();
+          db.systemConfig.ethAddress = document.getElementById("ethInput").value.trim();
+          db.systemConfig.usdtAddress = document.getElementById("usdtInput").value.trim();
+          writeState(db);
+          alert("Settings saved.");
+          render();
+        };
+      }
+
+      init3DEffects();
+      initMotionEffects();
+      if (activeTab === "dashboard") {
+        renderLiveChart();
+      }
+    }
+
+    function init3DEffects() {
+      document.querySelectorAll(".tilt-card").forEach((card) => {
+        card.onmousemove = (e) => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const rx = ((y / rect.height) - 0.5) * -10;
+          const ry = ((x / rect.width) - 0.5) * 10;
+          card.style.transform = `rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) translateZ(8px)`;
+        };
+        card.onmouseleave = () => {
+          card.style.transform = "rotateX(0deg) rotateY(0deg) translateZ(0)";
+        };
+      });
+    }
+
+    function initMotionEffects() {
+      const scope = document.querySelector("main") || document.getElementById("app");
+      if (!scope) return;
+      const items = scope.querySelectorAll(".tilt-card, .btn-3d, .tabBtn");
+      items.forEach((el, idx) => {
+        el.classList.add("motion-item");
+        el.style.animationDelay = `${Math.min(idx * 45, 420)}ms`;
+      });
+    }
+
+    function render() {
+      const state = readState();
+      const user = currentUser(state);
+      if (!user) return renderAuth(state);
+      return renderMain(state, user);
+    }
+
+    async function handleResetFromLink() {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("reset_token");
+      const email = (params.get("email") || "").trim().toLowerCase();
+      if (!token || !email) return;
+
+      const newPassword = prompt(`Reset password for ${email}\nEnter new password (min 6 characters):`) || "";
+      if (newPassword.length < 6) {
+        alert("Password must be at least 6 characters.");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/reset-password`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, token, newPassword })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          alert(data.error || "Reset link is invalid or expired.");
+          return;
+        }
+
+        const db = readState();
+        const user = db.users.find((u) => (u.email || "").toLowerCase() === email);
+        if (user) {
+          user.password = newPassword;
+          writeState(db);
+        }
+
+        alert("Password reset successful. You can now sign in.");
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, "", cleanUrl);
+      } catch {
+        alert("Password reset service unavailable. Ensure backend is running on http://localhost:4000.");
+      }
+    }
+
+    handleResetFromLink().finally(render);
+  </script>
+</body>
+</html>

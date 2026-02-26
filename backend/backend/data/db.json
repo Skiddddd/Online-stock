@@ -1,0 +1,118 @@
+{
+  "users": [
+    {
+      "id": "admin-1",
+      "email": "admin@nexus.io",
+      "fullName": "Nexus Admin",
+      "passwordHash": "5808448adfb149cef1dc6165c4039d98:964e3e8dfcae9147776bcb6ad524f7bbb5ac55943eac92b41014868078adc80f4706d3ae4b1a7f999e1fceff01d11683655d323b0b4b945072c9e562559989b7",
+      "balance": 1000000,
+      "role": "ADMIN",
+      "isActive": true,
+      "createdAt": "2026-02-25T19:49:23.125Z"
+    }
+  ],
+  "transactions": [],
+  "passwordResets": [
+    {
+      "id": "rst_1ca102d5",
+      "userId": null,
+      "email": "aarondorcas3@gmail.com",
+      "tokenHash": "a67c4b8d9e313c8611dff3df4e8c36fb34bc168d21125caef1e7c3b194c3ae53",
+      "expiresAt": "2026-02-25T20:38:44.013Z",
+      "createdAt": "2026-02-25T20:08:44.013Z"
+    },
+    {
+      "id": "rst_b9781d85",
+      "userId": null,
+      "email": "aarondorcas3@gmail.com",
+      "tokenHash": "e50be8f5d6c44c27d79d4c487c53692c5ed9521e30d2899ca873a7c9e88b6c57",
+      "expiresAt": "2026-02-25T20:39:48.836Z",
+      "createdAt": "2026-02-25T20:09:48.836Z"
+    },
+    {
+      "id": "rst_b385521c",
+      "userId": null,
+      "email": "aarondorcas3@gmail.com",
+      "tokenHash": "6c9897249fcc223cb295c60a3e7a1b63ae9ee675f9851ee1fe63d82031cbb9cd",
+      "expiresAt": "2026-02-25T20:40:23.738Z",
+      "createdAt": "2026-02-25T20:10:23.738Z"
+    },
+    {
+      "id": "rst_fff700d5",
+      "userId": null,
+      "email": "aarondorcas3@gmail.com",
+      "tokenHash": "61b071e255ab7dec5db712a3e0aa2dcc9b5dc36a5579d70f0f19cdf4563ab4d2",
+      "expiresAt": "2026-02-25T20:41:45.315Z",
+      "createdAt": "2026-02-25T20:11:45.315Z"
+    },
+    {
+      "id": "rst_47c65329",
+      "userId": null,
+      "email": "aarondorcas3@gmail.com",
+      "tokenHash": "bc45fedbc6ceb7672a4841e727a7f54a9ffdc82cf73aad8d895bd0f1f4e07c70",
+      "expiresAt": "2026-02-25T20:49:17.998Z",
+      "createdAt": "2026-02-25T20:19:17.998Z"
+    },
+    {
+      "id": "rst_d0dfe492",
+      "userId": null,
+      "email": "aarondorcas3@gmail.com",
+      "tokenHash": "756277817fb59852807058a5a392bbdb505f670957cc3c748f13c94fb1060082",
+      "expiresAt": "2026-02-25T20:54:24.210Z",
+      "createdAt": "2026-02-25T20:24:24.210Z"
+    },
+    {
+      "id": "rst_c03548a8",
+      "userId": null,
+      "email": "aarondorcas3@gmail.com",
+      "tokenHash": "4d5d583d41db0a0930ac2bcb489e781e9e6de1de96aa08c6371e6dc40f1fc509",
+      "expiresAt": "2026-02-25T20:54:25.629Z",
+      "createdAt": "2026-02-25T20:24:25.632Z"
+    },
+    {
+      "id": "rst_a215d563",
+      "userId": null,
+      "email": "aarondorcas3@gmail.com",
+      "tokenHash": "b7a5ccba6bdc2fd6cc1d9cb683c28ae48a1e3dd42eb40a522ff99ac807c9d642",
+      "expiresAt": "2026-02-25T20:55:36.156Z",
+      "createdAt": "2026-02-25T20:25:36.156Z"
+    }
+  ],
+  "plans": [
+    {
+      "id": "plan-1",
+      "name": "BTC Core Income",
+      "minAmount": 250,
+      "maxAmount": 5000,
+      "dailyRoi": 0.18,
+      "durationDays": 30,
+      "risk": "Low",
+      "strategy": "Market-neutral BTC basis and hedged carry."
+    },
+    {
+      "id": "plan-2",
+      "name": "Blue Chip Momentum",
+      "minAmount": 5000,
+      "maxAmount": 25000,
+      "dailyRoi": 0.26,
+      "durationDays": 60,
+      "risk": "Medium",
+      "strategy": "Rotational exposure across BTC, ETH, and large-cap alts."
+    },
+    {
+      "id": "plan-3",
+      "name": "Opportunistic Alpha",
+      "minAmount": 25000,
+      "maxAmount": 250000,
+      "dailyRoi": 0.34,
+      "durationDays": 90,
+      "risk": "High",
+      "strategy": "Actively managed swing allocation with strict drawdown controls."
+    }
+  ],
+  "systemConfig": {
+    "btcAddress": "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
+    "ethAddress": "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
+    "usdtAddress": "0x71C7656EC7ab88b098defB751B7401B5f6d8976F"
+  }
+}
