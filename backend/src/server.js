@@ -21,8 +21,14 @@ function hashResetToken(token) {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-function getAppUrl() {
-  return process.env.APP_URL || "http://localhost:5500";
+function getAppUrl(req) {
+  const configured = process.env.APP_URL;
+  if (configured) return configured;
+
+  const origin = req?.headers?.origin;
+  if (origin) return origin;
+
+  return "http://localhost:5500";
 }
 
 function getSmtpConfig() {
@@ -67,6 +73,29 @@ async function sendResetEmail({ email, resetLink }) {
   });
 }
 
+async function sendMagicLinkEmail({ email, magicLink }) {
+  const smtp = getSmtpConfig();
+  if (!smtp.enabled) {
+    console.log(`[dev] SMTP not configured. Magic link for ${email}: ${magicLink}`);
+    return;
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: smtp.host,
+    port: smtp.port,
+    secure: smtp.secure,
+    auth: { user: smtp.user, pass: smtp.pass }
+  });
+
+  await transporter.sendMail({
+    from: smtp.from,
+    to: email,
+    subject: "Your Skid Invest sign-in link",
+    text: `Use this one-time link to sign in:\n${magicLink}\n\nThis link expires in 15 minutes.`,
+    html: `<p>Use this one-time link to sign in:</p><p><a href="${magicLink}">Sign in to your account</a></p><p>This link expires in 15 minutes.</p>`
+  });
+}
+
 function authRequired(req, res, next) {
   const header = req.headers.authorization || "";
   const token = header.startsWith("Bearer ") ? header.slice(7) : "";
@@ -102,6 +131,10 @@ async function ensureAdminSeed() {
 
   if (!Array.isArray(db.passwordResets)) {
     db.passwordResets = [];
+    mutated = true;
+  }
+  if (!Array.isArray(db.magicLinks)) {
+    db.magicLinks = [];
     mutated = true;
   }
 
@@ -285,7 +318,7 @@ app.post("/api/auth/forgot-password", async (req, res) => {
   });
   await writeDb(db);
 
-  const resetLink = `${getAppUrl()}/?reset_token=${encodeURIComponent(rawToken)}&email=${encodeURIComponent(normalizedEmail)}`;
+  const resetLink = `${getAppUrl(req)}/?reset_token=${encodeURIComponent(rawToken)}&email=${encodeURIComponent(normalizedEmail)}`;
   try {
     await sendResetEmail({ email: normalizedEmail, resetLink });
   } catch (err) {
@@ -294,6 +327,77 @@ app.post("/api/auth/forgot-password", async (req, res) => {
   }
 
   res.json({ message: "If an account exists, a reset link has been sent." });
+});
+
+app.post("/api/auth/magic-link/request", async (req, res) => {
+  const { email } = req.body || {};
+  const normalizedEmail = String(email || "").toLowerCase().trim();
+  if (!normalizedEmail) {
+    return res.status(400).json({ error: "email is required." });
+  }
+
+  const db = await readDb();
+  db.magicLinks = Array.isArray(db.magicLinks) ? db.magicLinks : [];
+  db.magicLinks = db.magicLinks.filter((entry) => new Date(entry.expiresAt).getTime() > Date.now());
+
+  const user = db.users.find((u) => u.email.toLowerCase() === normalizedEmail);
+  if (!user || !user.isActive) {
+    await writeDb(db);
+    return res.json({ message: "If an account exists, a sign-in link has been issued." });
+  }
+
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  db.magicLinks.push({
+    id: makeId("mlk"),
+    userId: user.id,
+    email: normalizedEmail,
+    tokenHash: hashResetToken(rawToken),
+    expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+    createdAt: new Date().toISOString()
+  });
+  await writeDb(db);
+
+  const magicLink = `${getAppUrl(req)}/?magic_token=${encodeURIComponent(rawToken)}&email=${encodeURIComponent(normalizedEmail)}`;
+  try {
+    await sendMagicLinkEmail({ email: normalizedEmail, magicLink });
+  } catch (err) {
+    console.error("Failed to send magic link email:", err);
+  }
+
+  res.json({ message: "If an account exists, a sign-in link has been issued.", magicLink });
+});
+
+app.post("/api/auth/magic-link/consume", async (req, res) => {
+  const { email, token } = req.body || {};
+  const normalizedEmail = String(email || "").toLowerCase().trim();
+  if (!normalizedEmail || !token) {
+    return res.status(400).json({ error: "email and token are required." });
+  }
+
+  const db = await readDb();
+  db.magicLinks = Array.isArray(db.magicLinks) ? db.magicLinks : [];
+
+  const tokenHash = hashResetToken(String(token));
+  const linkEntry = db.magicLinks.find((entry) =>
+    entry.email.toLowerCase() === normalizedEmail &&
+    entry.tokenHash === tokenHash &&
+    new Date(entry.expiresAt).getTime() > Date.now()
+  );
+
+  if (!linkEntry) {
+    return res.status(400).json({ error: "Invalid or expired magic link." });
+  }
+
+  const user = db.users.find((u) => u.id === linkEntry.userId);
+  if (!user || !user.isActive) {
+    return res.status(403).json({ error: "Account not available." });
+  }
+
+  db.magicLinks = db.magicLinks.filter((entry) => entry.id !== linkEntry.id);
+  await writeDb(db);
+
+  const signedToken = signToken(user);
+  res.json({ token: signedToken, user: sanitizeUser(user) });
 });
 
 app.post("/api/auth/reset-password", async (req, res) => {

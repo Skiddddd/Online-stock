@@ -8,6 +8,7 @@ const INITIAL_DATA = {
   users: [],
   transactions: [],
   passwordResets: [],
+  magicLinks: [],
   plans: [
     {
       id: "plan-1",

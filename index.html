@@ -294,6 +294,7 @@
                 ${isRegistering ? "Already have an account? Login" : "Don't have an account? Sign up"}
               </button>
               ${!isRegistering ? `<button id="forgotPassword" class="mt-2 text-sm text-slate-500 hover:text-emerald-300 w-full">Forgot Password?</button>` : ""}
+              ${!isRegistering ? `<button id="magicLinkLogin" class="mt-2 text-sm text-slate-500 hover:text-emerald-300 w-full">Email Login Link</button>` : ""}
             </div>
             <div class="mt-6 text-center text-xs text-slate-500">
               <p class="surface-chip inline-block px-3 py-1 rounded-full">Admin: admin@nexus.io / Admin@123</p>
@@ -359,6 +360,37 @@
             alert("If the account exists, a reset link has been sent to your email.");
           } catch {
             alert(`Password reset service unavailable at ${API_BASE}.`);
+          }
+        };
+      }
+
+      const magicLinkLoginBtn = document.getElementById("magicLinkLogin");
+      if (magicLinkLoginBtn) {
+        magicLinkLoginBtn.onclick = async () => {
+          const email = (prompt("Enter your account email:") || "").trim().toLowerCase();
+          if (!email) return;
+          try {
+            const res = await fetch(`${API_BASE}/api/auth/magic-link/request`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email })
+            });
+            const raw = await res.text();
+            const data = raw ? JSON.parse(raw) : {};
+            if (!res.ok) {
+              alert(data.error || `Could not issue sign-in link (${res.status}).`);
+              return;
+            }
+            if (data.magicLink) {
+              const openNow = confirm("Magic sign-in link generated. Open it now?");
+              if (openNow) {
+                window.location.href = data.magicLink;
+                return;
+              }
+            }
+            alert(data.message || "If the account exists, a sign-in link has been issued.");
+          } catch {
+            alert(`Magic link service unavailable at ${API_BASE}.`);
           }
         };
       }
@@ -936,8 +968,52 @@
 
     async function handleResetFromLink() {
       const params = new URLSearchParams(window.location.search);
+      const magicToken = params.get("magic_token");
       const token = params.get("reset_token");
       const email = (params.get("email") || "").trim().toLowerCase();
+
+      if (magicToken && email) {
+        try {
+          const res = await fetch(`${API_BASE}/api/auth/magic-link/consume`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, token: magicToken })
+          });
+          const raw = await res.text();
+          const data = raw ? JSON.parse(raw) : {};
+          if (!res.ok) {
+            alert(data.error || `Magic link is invalid or expired (${res.status}).`);
+            return;
+          }
+
+          const db = readState();
+          let user = db.users.find((u) => (u.email || "").toLowerCase() === email);
+          if (!user) {
+            user = {
+              id: uid(),
+              email,
+              password: "",
+              fullName: data?.user?.fullName || email.split("@")[0],
+              balance: Number(data?.user?.balance || 0),
+              role: data?.user?.role || "USER",
+              createdAt: new Date().toISOString()
+            };
+            db.users.push(user);
+          }
+          db.currentUserId = user.id;
+          writeState(db);
+
+          alert("Signed in with magic link.");
+          const cleanUrl = window.location.origin + window.location.pathname;
+          window.history.replaceState({}, "", cleanUrl);
+          render();
+          return;
+        } catch {
+          alert(`Magic link service unavailable at ${API_BASE}.`);
+          return;
+        }
+      }
+
       if (!token || !email) return;
 
       const newPassword = prompt(`Reset password for ${email}\nEnter new password (min 6 characters):`) || "";
