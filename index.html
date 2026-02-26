@@ -164,7 +164,7 @@
 
   <script>
     const DB_KEY = "nexus_static_db_v1";
-    const API_BASE = "http://localhost:4000";
+    const API_BASE = "https://nexus-production-db17.up.railway.app";
 
     const DEFAULT_STATE = {
       currentUserId: null,
@@ -351,7 +351,7 @@
             }
             alert("If the account exists, a reset link has been sent to your email.");
           } catch {
-            alert("Password reset service unavailable. Ensure backend is running on http://localhost:4000.");
+          alert("Password reset service unavailable. Ensure backend is running on https://nexus-production-db17.up.railway.app.");
           }
         };
       }
@@ -962,7 +962,7 @@
         const cleanUrl = window.location.origin + window.location.pathname;
         window.history.replaceState({}, "", cleanUrl);
       } catch {
-        alert("Password reset service unavailable. Ensure backend is running on http://localhost:4000.");
+          alert("Password reset service unavailable. Ensure backend is running on https://nexus-production-db17.up.railway.app.");
       }
     }
 
