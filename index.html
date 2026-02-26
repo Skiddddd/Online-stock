@@ -164,7 +164,13 @@
 
   <script>
     const DB_KEY = "nexus_static_db_v1";
-    const API_BASE = "https://nexus-production-db17.up.railway.app";
+    const API_BASE_KEY = "NEXUS_API_BASE";
+    const DEFAULT_API_BASE = "https://nexus-production-db17.up.railway.app";
+    const queryApiBase = new URLSearchParams(window.location.search).get("api_base");
+    if (queryApiBase) {
+      localStorage.setItem(API_BASE_KEY, queryApiBase.trim());
+    }
+    const API_BASE = (localStorage.getItem(API_BASE_KEY) || DEFAULT_API_BASE).replace(/\/+$/, "");
 
     const DEFAULT_STATE = {
       currentUserId: null,
@@ -344,14 +350,15 @@
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ email })
             });
-            const data = await res.json().catch(() => ({}));
+            const raw = await res.text();
+            const data = raw ? JSON.parse(raw) : {};
             if (!res.ok) {
-              alert(data.error || "Could not process reset request.");
+              alert(data.error || `Could not process reset request (${res.status}).`);
               return;
             }
             alert("If the account exists, a reset link has been sent to your email.");
           } catch {
-          alert("Password reset service unavailable. Ensure backend is running on https://nexus-production-db17.up.railway.app.");
+            alert(`Password reset service unavailable at ${API_BASE}.`);
           }
         };
       }
@@ -945,9 +952,10 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, token, newPassword })
         });
-        const data = await res.json().catch(() => ({}));
+        const raw = await res.text();
+        const data = raw ? JSON.parse(raw) : {};
         if (!res.ok) {
-          alert(data.error || "Reset link is invalid or expired.");
+          alert(data.error || `Reset link is invalid or expired (${res.status}).`);
           return;
         }
 
@@ -962,7 +970,7 @@
         const cleanUrl = window.location.origin + window.location.pathname;
         window.history.replaceState({}, "", cleanUrl);
       } catch {
-          alert("Password reset service unavailable. Ensure backend is running on https://nexus-production-db17.up.railway.app.");
+          alert(`Password reset service unavailable at ${API_BASE}.`);
       }
     }
 
