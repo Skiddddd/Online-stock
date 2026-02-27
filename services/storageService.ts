@@ -7,7 +7,7 @@ const defaultState: AppState = {
     {
       id: 'admin-1',
       email: 'admin@nexus.io',
-      fullName: 'Nexus Admin',
+      fullName: 'Gabriel Admin',
       balance: 1000000,
       role: UserRole.ADMIN,
       createdAt: new Date().toISOString()
@@ -25,7 +25,13 @@ export const storageService = {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultState));
       return defaultState;
     }
-    return JSON.parse(saved);
+    const state: AppState = JSON.parse(saved);
+    const admin = state.users.find((u) => u.email === 'admin@nexus.io');
+    if (admin && admin.fullName !== 'Gabriel Admin') {
+      admin.fullName = 'Gabriel Admin';
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+    return state;
   },
 
   saveState: (state: AppState) => {

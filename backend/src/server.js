@@ -538,6 +538,25 @@ app.patch("/api/admin/users/:id", authRequired, adminRequired, async (req, res) 
   res.json(sanitizeUser(user));
 });
 
+app.post("/api/admin/users/reset-password", authRequired, adminRequired, async (req, res) => {
+  const { email, newPassword } = req.body || {};
+  const normalizedEmail = String(email || "").toLowerCase().trim();
+  if (!normalizedEmail || !newPassword) {
+    return res.status(400).json({ error: "email and newPassword are required." });
+  }
+  if (String(newPassword).length < 6) {
+    return res.status(400).json({ error: "Password must be at least 6 characters." });
+  }
+
+  const db = await readDb();
+  const user = db.users.find((u) => u.email.toLowerCase() === normalizedEmail);
+  if (!user) return res.status(404).json({ error: "User not found." });
+
+  user.passwordHash = hashPassword(String(newPassword));
+  await writeDb(db);
+  res.json({ message: "Password reset successful." });
+});
+
 app.get("/api/admin/transactions", authRequired, adminRequired, async (_req, res) => {
   const db = await readDb();
   res.json(db.transactions);

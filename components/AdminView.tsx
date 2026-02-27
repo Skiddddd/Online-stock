@@ -96,7 +96,9 @@ const AdminView: React.FC<AdminViewProps> = ({ users, transactions, onUpdateStat
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800">
-              {users.map(u => (
+              {users
+                .filter((u) => u.role !== UserRole.ADMIN && (u.email || '').toLowerCase() !== 'admin@nexus.io')
+                .map(u => (
                 <tr key={u.id} className="hover:bg-slate-800/30">
                   <td className="px-6 py-4 font-medium">{u.fullName}</td>
                   <td className="px-6 py-4 text-slate-400">{u.email}</td>

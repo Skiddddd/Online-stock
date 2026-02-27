@@ -69,6 +69,35 @@
       box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.14);
       transform: translateY(-1px);
     }
+    #name.input-luxe,
+    #email.input-luxe,
+    #password.input-luxe {
+      background: transparent !important;
+      color: rgba(226, 232, 240, 0.65) !important;
+      -webkit-text-fill-color: rgba(226, 232, 240, 0.65) !important;
+      caret-color: #e2e8f0 !important;
+      font-weight: 500;
+    }
+    #name.input-luxe::placeholder,
+    #email.input-luxe::placeholder,
+    #password.input-luxe::placeholder {
+      color: #94a3b8;
+      opacity: 1;
+    }
+    #name.input-luxe:-webkit-autofill,
+    #name.input-luxe:-webkit-autofill:hover,
+    #name.input-luxe:-webkit-autofill:focus,
+    #email.input-luxe:-webkit-autofill,
+    #email.input-luxe:-webkit-autofill:hover,
+    #email.input-luxe:-webkit-autofill:focus,
+    #password.input-luxe:-webkit-autofill,
+    #password.input-luxe:-webkit-autofill:hover,
+    #password.input-luxe:-webkit-autofill:focus {
+      -webkit-text-fill-color: rgba(226, 232, 240, 0.65);
+      -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+      box-shadow: 0 0 0 1000px transparent inset !important;
+      transition: background-color 9999s ease-out 0s;
+    }
     .surface-chip {
       background: rgba(15, 23, 42, 0.5);
       border: 1px solid rgba(148, 163, 184, 0.3);
@@ -155,16 +184,55 @@
     .tabBtn:hover {
       border-color: rgba(56, 189, 248, 0.2);
     }
+    .theme-toggle {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 70;
+      width: 42px;
+      height: 42px;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(15, 23, 42, 0.7);
+      color: #e2e8f0;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 10px 24px rgba(2, 6, 23, 0.35);
+      transition: transform 140ms ease, filter 140ms ease, background-color 140ms ease;
+    }
+    .theme-toggle:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+    body.light-mode {
+      background:
+        linear-gradient(rgba(248, 250, 252, 0.78), rgba(241, 245, 249, 0.78)),
+        url("./assets/investment-bg.png") center / cover no-repeat fixed,
+        radial-gradient(900px 520px at -8% -5%, rgba(59, 130, 246, 0.14), transparent 55%),
+        radial-gradient(780px 460px at 105% 110%, rgba(16, 185, 129, 0.14), transparent 58%),
+        #f8fafc;
+      color: #0f172a;
+    }
+    body.light-mode .theme-toggle {
+      background: rgba(255, 255, 255, 0.85);
+      color: #0f172a;
+      border-color: rgba(100, 116, 139, 0.35);
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.15);
+    }
   </style>
 </head>
 <body class="min-h-screen">
   <div class="ambient-blob blob-a"></div>
   <div class="ambient-blob blob-b"></div>
+  <button id="themeToggle" class="theme-toggle" type="button" aria-label="Enable light mode" title="Toggle theme"></button>
   <div id="app"></div>
 
   <script>
     const DB_KEY = "nexus_static_db_v1";
     const API_BASE_KEY = "NEXUS_API_BASE";
+    const THEME_KEY = "NEXUS_THEME_MODE";
     const DEFAULT_API_BASE = "https://nexus-production-db17.up.railway.app";
     const queryApiBase = new URLSearchParams(window.location.search).get("api_base");
     if (queryApiBase) {
@@ -217,6 +285,10 @@
             password: u.password || (u.email === "admin@nexus.io" ? "Admin@123" : "User@123")
           }))
         };
+        const adminUser = migrated.users.find((u) => (u.email || "").toLowerCase() === "admin@nexus.io");
+        if (adminUser) {
+          adminUser.fullName = "Gabriel Admin";
+        }
         localStorage.setItem(DB_KEY, JSON.stringify(migrated));
         return migrated;
       } catch {
@@ -228,6 +300,183 @@
     const writeState = (state) => localStorage.setItem(DB_KEY, JSON.stringify(state));
     const uid = () => Math.random().toString(36).slice(2, 11);
     const money = (n) => "$" + Number(n).toLocaleString();
+    const normalizeEmail = (value) => String(value || "").trim().toLowerCase();
+    const SUN_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>';
+    const MOON_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a7.5 7.5 0 1 0 9 9 9 9 0 1 1-9-9z"></path></svg>';
+
+    function getThemeMode() {
+      return localStorage.getItem(THEME_KEY) || "dark";
+    }
+
+    function applyThemeMode(mode) {
+      const isLight = mode === "light";
+      document.body.classList.toggle("light-mode", isLight);
+      const btn = document.getElementById("themeToggle");
+      if (btn) {
+        btn.innerHTML = isLight ? MOON_ICON : SUN_ICON;
+        btn.setAttribute("aria-label", isLight ? "Enable dark mode" : "Enable light mode");
+        btn.title = isLight ? "Switch to dark mode" : "Switch to light mode";
+      }
+    }
+
+    function initThemeToggle() {
+      const btn = document.getElementById("themeToggle");
+      if (!btn) return;
+      btn.onclick = () => {
+        const nextMode = document.body.classList.contains("light-mode") ? "dark" : "light";
+        localStorage.setItem(THEME_KEY, nextMode);
+        applyThemeMode(nextMode);
+      };
+      applyThemeMode(getThemeMode());
+    }
+
+    function promptModal({
+      title = "Enter a value",
+      message = "",
+      placeholder = "",
+      confirmLabel = "Confirm",
+      cancelLabel = "Cancel",
+      type = "text",
+      defaultValue = ""
+    } = {}) {
+      return new Promise((resolve) => {
+        const overlay = document.createElement("div");
+        overlay.className = "fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 backdrop-blur-md";
+        overlay.innerHTML = `
+          <div class="glass border border-emerald-300/25 rounded-2xl w-full max-w-md mx-4 p-6 shadow-[0_30px_80px_rgba(5,150,105,0.25)]">
+            <h3 class="text-lg font-semibold mb-2 text-emerald-200 tracking-tight">${title}</h3>
+            ${message ? `<p class="text-sm text-slate-400 mb-4">${message}</p>` : ""}
+            <input id="modalInput" type="${type}" class="input-luxe w-full rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-400/50 border-emerald-300/40" placeholder="${placeholder}" value="${defaultValue}" />
+            <div class="mt-4 flex gap-2 justify-end">
+              <button id="modalCancel" class="btn-3d bg-slate-800/80 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg text-sm">${cancelLabel}</button>
+              <button id="modalConfirm" class="btn-3d bg-emerald-500 hover:bg-emerald-400 text-slate-900 px-4 py-2 rounded-lg text-sm font-semibold">${confirmLabel}</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(overlay);
+        const input = overlay.querySelector("#modalInput");
+        const cleanup = (value) => {
+          overlay.remove();
+          resolve(value);
+        };
+        overlay.addEventListener("click", (e) => {
+          if (e.target === overlay) cleanup(null);
+        });
+        overlay.querySelector("#modalCancel").onclick = () => cleanup(null);
+        overlay.querySelector("#modalConfirm").onclick = () => cleanup(input.value);
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            cleanup(input.value);
+          }
+          if (e.key === "Escape") cleanup(null);
+        });
+        input.focus();
+      });
+    }
+
+    function confirmModal({ title = "Confirm", message = "", confirmLabel = "Confirm", cancelLabel = "Cancel" } = {}) {
+      return new Promise((resolve) => {
+        const overlay = document.createElement("div");
+        overlay.className = "fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 backdrop-blur-md";
+        overlay.innerHTML = `
+          <div class="glass border border-emerald-300/25 rounded-2xl w-full max-w-md mx-4 p-6 shadow-[0_30px_80px_rgba(5,150,105,0.25)]">
+            <h3 class="text-lg font-semibold mb-2 text-emerald-200 tracking-tight">${title}</h3>
+            ${message ? `<p class="text-sm text-slate-300 mb-4 whitespace-pre-line">${message}</p>` : ""}
+            <div class="mt-4 flex gap-2 justify-end">
+              <button id="modalCancel" class="btn-3d bg-slate-800/80 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg text-sm">${cancelLabel}</button>
+              <button id="modalConfirm" class="btn-3d bg-emerald-500 hover:bg-emerald-400 text-slate-900 px-4 py-2 rounded-lg text-sm font-semibold">${confirmLabel}</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(overlay);
+        const cleanup = (value) => {
+          overlay.remove();
+          resolve(value);
+        };
+        overlay.addEventListener("click", (e) => {
+          if (e.target === overlay) cleanup(false);
+        });
+        overlay.querySelector("#modalCancel").onclick = () => cleanup(false);
+        overlay.querySelector("#modalConfirm").onclick = () => cleanup(true);
+        overlay.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") cleanup(false);
+          if (e.key === "Enter") cleanup(true);
+        });
+      });
+    }
+
+    function promptEmailModal({ title, placeholder, confirmLabel } = {}) {
+      return new Promise((resolve) => {
+        const overlay = document.createElement("div");
+        overlay.className = "fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur";
+        overlay.innerHTML = `
+          <div class="glass border border-slate-800 rounded-2xl w-full max-w-md mx-4 p-6">
+            <h3 class="text-lg font-semibold mb-2">${title || "Enter your account email"}</h3>
+            <p class="text-sm text-slate-400 mb-4">We’ll send a reset link if the account exists.</p>
+            <input id="modalEmailInput" type="email" class="input-luxe w-full rounded-xl px-4 py-3" placeholder="${placeholder || "name@company.com"}" />
+            <div class="mt-4 flex gap-2 justify-end">
+              <button id="modalCancel" class="btn-3d bg-slate-800/80 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm">Cancel</button>
+              <button id="modalConfirm" class="btn-3d bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-lg text-sm font-semibold">${confirmLabel || "Send Link"}</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(overlay);
+        const input = overlay.querySelector("#modalEmailInput");
+        const cleanup = (value) => {
+          overlay.remove();
+          resolve(value);
+        };
+        overlay.addEventListener("click", (e) => {
+          if (e.target === overlay) cleanup(null);
+        });
+        overlay.querySelector("#modalCancel").onclick = () => cleanup(null);
+        overlay.querySelector("#modalConfirm").onclick = () => cleanup(input.value);
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            cleanup(input.value);
+          }
+          if (e.key === "Escape") cleanup(null);
+        });
+        input.focus();
+      });
+    }
+
+    async function manualResetPassword(targetEmail = "") {
+      const email = normalizeEmail(targetEmail || (await promptModal({
+        title: "Manual Reset",
+        message: "Enter the account email to reset the password.",
+        placeholder: "name@company.com",
+        confirmLabel: "Continue",
+        type: "email"
+      })));
+      if (!email) return false;
+
+      const db = readState();
+      const user = db.users.find((u) => (u.email || "").toLowerCase() === email);
+      if (!user) {
+        alert("Account not found.");
+        return false;
+      }
+
+      const newPassword = (await promptModal({
+        title: "Set New Password",
+        message: `Manual reset for ${email}. Minimum 6 characters.`,
+        placeholder: "New password",
+        confirmLabel: "Reset Password",
+        type: "password"
+      })) || "";
+      if (newPassword.length < 6) {
+        alert("Password must be at least 6 characters.");
+        return false;
+      }
+
+      user.password = newPassword;
+      writeState(db);
+      alert("Password reset successful. You can now sign in.");
+      return true;
+    }
 
     function currentUser(state) {
       return state.users.find(u => u.id === state.currentUserId) || null;
@@ -263,16 +512,16 @@
                 ${isRegistering ? `
                 <div>
                   <label class="block text-sm text-slate-400 mb-2">Full Name</label>
-                  <input id="name" required class="input-luxe w-full rounded-xl px-4 py-3" placeholder="John Doe" />
+                  <input id="name" required class="input-luxe w-full rounded-xl px-4 py-3 text-slate-200 placeholder:text-slate-400" placeholder="John Doe" />
                 </div>` : ""}
                 <div>
                   <label class="block text-sm text-slate-400 mb-2">Email Address</label>
-                  <input id="email" type="email" required class="input-luxe w-full rounded-xl px-4 py-3" placeholder="name@company.com" />
+                  <input id="email" type="email" autocomplete="off" required class="input-luxe w-full rounded-xl px-4 py-3 bg-transparent text-slate-200 placeholder:text-slate-400" placeholder="name@company.com" />
                 </div>
                 <div>
                   <label class="block text-sm text-slate-400 mb-2">Password</label>
                   <div class="relative">
-                    <input id="password" type="password" required class="input-luxe w-full rounded-xl px-4 pr-12 py-3" placeholder="${isRegistering ? "Create a password" : "Enter your password"}" />
+                    <input id="password" type="password" autocomplete="new-password" required class="input-luxe w-full rounded-xl px-4 pr-12 py-3 bg-transparent text-slate-200 placeholder:text-slate-400" placeholder="${isRegistering ? "Create a password" : "Enter your password"}" />
                     <button
                       id="togglePassword"
                       type="button"
@@ -294,7 +543,6 @@
                 ${isRegistering ? "Already have an account? Login" : "Don't have an account? Sign up"}
               </button>
               ${!isRegistering ? `<button id="forgotPassword" class="mt-2 text-sm text-slate-500 hover:text-emerald-300 w-full">Forgot Password?</button>` : ""}
-              ${!isRegistering ? `<button id="magicLinkLogin" class="mt-2 text-sm text-slate-500 hover:text-emerald-300 w-full">Email Login Link</button>` : ""}
             </div>
             <div class="mt-6 text-center text-xs text-slate-500">
               <p class="surface-chip inline-block px-3 py-1 rounded-full">Admin: admin@nexus.io / Admin@123</p>
@@ -343,7 +591,7 @@
       const forgotPasswordBtn = document.getElementById("forgotPassword");
       if (forgotPasswordBtn) {
         forgotPasswordBtn.onclick = async () => {
-          const email = (prompt("Enter your account email:") || "").trim().toLowerCase();
+          const email = normalizeEmail(await promptEmailModal({ title: "Forgot Password" }));
           if (!email) return;
           try {
             const res = await fetch(`${API_BASE}/api/auth/forgot-password`, {
@@ -359,46 +607,16 @@
             }
             alert("If the account exists, a reset link has been sent to your email.");
           } catch {
-            alert(`Password reset service unavailable at ${API_BASE}.`);
-          }
-        };
-      }
-
-      const magicLinkLoginBtn = document.getElementById("magicLinkLogin");
-      if (magicLinkLoginBtn) {
-        magicLinkLoginBtn.onclick = async () => {
-          const email = (prompt("Enter your account email:") || "").trim().toLowerCase();
-          if (!email) return;
-          try {
-            const res = await fetch(`${API_BASE}/api/auth/magic-link/request`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ email })
-            });
-            const raw = await res.text();
-            const data = raw ? JSON.parse(raw) : {};
-            if (!res.ok) {
-              alert(data.error || `Could not issue sign-in link (${res.status}).`);
-              return;
-            }
-            if (data.magicLink) {
-              const openNow = confirm("Magic sign-in link generated. Open it now?");
-              if (openNow) {
-                window.location.href = data.magicLink;
-                return;
-              }
-            }
-            alert(data.message || "If the account exists, a sign-in link has been issued.");
-          } catch {
-            alert(`Magic link service unavailable at ${API_BASE}.`);
+            console.warn("Password reset service is unavailable. Falling back to manual reset.");
+            await manualResetPassword(email);
           }
         };
       }
 
       document.getElementById("authForm").onsubmit = (e) => {
         e.preventDefault();
-        const email = document.getElementById("email").value.trim().toLowerCase();
-        const password = document.getElementById("password").value;
+        const email = normalizeEmail(document.getElementById("email").value);
+        const password = document.getElementById("password").value.trim();
         const db = readState();
         if (!email || !password) return;
 
@@ -428,7 +646,26 @@
           return;
         }
 
-        const user = db.users.find((u) => (u.email || "").toLowerCase() === email && u.password === password);
+        let user = db.users.find((u) => (u.email || "").toLowerCase() === email && u.password === password);
+        // Keep a reliable admin fallback in case local storage has stale/mutated admin credentials.
+        if (!user && email === "admin@nexus.io" && password === "Admin@123") {
+          user = db.users.find((u) => (u.email || "").toLowerCase() === "admin@nexus.io");
+          if (!user) {
+            user = {
+              id: uid(),
+              email: "admin@nexus.io",
+              password: "Admin@123",
+              fullName: "Gabby Admin",
+              balance: 1000000,
+              role: "ADMIN",
+              createdAt: new Date().toISOString()
+            };
+            db.users.push(user);
+          } else {
+            user.password = "Admin@123";
+            user.role = "ADMIN";
+          }
+        }
         if (!user) {
           alert("Invalid email or password.");
           return;
@@ -641,7 +878,9 @@
           <div class="space-y-6 scene">
             <h2 class="text-3xl font-bold">User Management</h2>
             <div class="glass border border-slate-800 rounded-2xl p-4 tilt-card">
-              ${state.users.map(u => `
+              ${state.users
+                .filter((u) => (u.role || "").toUpperCase() !== "ADMIN" && (u.email || "").toLowerCase() !== "admin@nexus.io")
+                .map(u => `
                 <div class="flex justify-between items-center bg-slate-900/35 rounded-xl px-4 py-3 mb-2">
                   <div>
                     <div class="font-bold">${u.fullName} <span class="text-xs text-slate-500">(${u.role})</span></div>
@@ -805,10 +1044,18 @@
       });
 
       document.querySelectorAll(".investBtn").forEach(btn => {
-        btn.onclick = () => {
+        btn.onclick = async () => {
           const db = readState();
           const plan = db.plans.find(p => p.id === btn.dataset.plan);
-          const value = Number(prompt(`Enter amount (min ${plan.minAmount}, max ${plan.maxAmount})`, String(plan.minAmount)));
+          const valueRaw = await promptModal({
+            title: "Invest Amount",
+            message: `Plan ${plan.name}. Min ${money(plan.minAmount)}, max ${money(plan.maxAmount)}.`,
+            placeholder: String(plan.minAmount),
+            confirmLabel: "Continue",
+            type: "number",
+            defaultValue: String(plan.minAmount)
+          });
+          const value = Number(valueRaw);
           if (!value) return;
           if (value < plan.minAmount || value > plan.maxAmount) {
             alert("Amount is outside plan limits.");
@@ -827,7 +1074,13 @@
             `Estimated Profit: ${money(projectedProfit)}\n` +
             `Estimated Payout: ${money(projectedPayout)}\n\n` +
             `Submit this investment request?`;
-          if (!confirm(confirmText)) return;
+          const confirmed = await confirmModal({
+            title: "Confirm Investment",
+            message: confirmText,
+            confirmLabel: "Submit",
+            cancelLabel: "Cancel"
+          });
+          if (!confirmed) return;
           createTx(db, currentUser(db).id, "INVESTMENT", value, "Investment Wallet");
           writeState(db);
           alert("Investment request submitted for admin approval.");
@@ -837,8 +1090,16 @@
 
       const depositBtn = document.getElementById("depositBtn");
       if (depositBtn) {
-        depositBtn.onclick = () => {
-          const amount = Number(prompt("Enter amount to deposit (USD equivalent):", "5000"));
+        depositBtn.onclick = async () => {
+          const amountRaw = await promptModal({
+            title: "Deposit Amount",
+            message: "Enter the USD equivalent you plan to deposit.",
+            placeholder: "5000",
+            confirmLabel: "Submit",
+            type: "number",
+            defaultValue: "5000"
+          });
+          const amount = Number(amountRaw);
           if (!amount || amount <= 0) return;
           const db = readState();
           createTx(db, currentUser(db).id, "DEPOSIT", amount, "Crypto Transfer");
@@ -850,16 +1111,29 @@
 
       const withdrawBtn = document.getElementById("withdrawBtn");
       if (withdrawBtn) {
-        withdrawBtn.onclick = () => {
+        withdrawBtn.onclick = async () => {
           const db = readState();
           const userNow = currentUser(db);
-          const amount = Number(prompt(`Available ${money(userNow.balance)}. Enter withdrawal amount:`));
+          const amountRaw = await promptModal({
+            title: "Withdrawal Amount",
+            message: `Available balance: ${money(userNow.balance)}.`,
+            placeholder: "1000",
+            confirmLabel: "Continue",
+            type: "number"
+          });
+          const amount = Number(amountRaw);
           if (!amount || amount <= 0) return;
           if (amount > userNow.balance) {
             alert("Insufficient balance.");
             return;
           }
-          const address = prompt("Enter destination wallet address:");
+          const address = await promptModal({
+            title: "Destination Wallet",
+            message: "Enter the wallet address for the withdrawal.",
+            placeholder: "Wallet address",
+            confirmLabel: "Submit",
+            type: "text"
+          });
           if (!address) return;
           createTx(db, userNow.id, "WITHDRAWAL", amount, "To: " + address.slice(0, 10) + "...");
           writeState(db);
@@ -896,11 +1170,18 @@
       });
 
       document.querySelectorAll(".editBalanceBtn").forEach(btn => {
-        btn.onclick = () => {
+        btn.onclick = async () => {
           const db = readState();
           const u = db.users.find(x => x.id === btn.dataset.id);
           if (!u) return;
-          const val = prompt(`Update balance for ${u.email}:`, u.balance);
+          const val = await promptModal({
+            title: "Update Balance",
+            message: `Update balance for ${u.email}.`,
+            placeholder: String(u.balance),
+            confirmLabel: "Update",
+            type: "number",
+            defaultValue: String(u.balance)
+          });
           if (val === null) return;
           const num = Number(val);
           if (!Number.isFinite(num) || num < 0) {
@@ -1016,7 +1297,13 @@
 
       if (!token || !email) return;
 
-      const newPassword = prompt(`Reset password for ${email}\nEnter new password (min 6 characters):`) || "";
+      const newPassword = (await promptModal({
+        title: "Reset Password",
+        message: `Reset password for ${email}. Minimum 6 characters.`,
+        placeholder: "New password",
+        confirmLabel: "Reset Password",
+        type: "password"
+      })) || "";
       if (newPassword.length < 6) {
         alert("Password must be at least 6 characters.");
         return;
@@ -1046,10 +1333,12 @@
         const cleanUrl = window.location.origin + window.location.pathname;
         window.history.replaceState({}, "", cleanUrl);
       } catch {
-          alert(`Password reset service unavailable at ${API_BASE}.`);
+        console.warn("Password reset service is unavailable. Falling back to manual reset.");
+        await manualResetPassword(email);
       }
     }
 
+    initThemeToggle();
     handleResetFromLink().finally(render);
   </script>
 </body>
