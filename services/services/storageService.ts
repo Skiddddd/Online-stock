@@ -18,6 +18,13 @@ const defaultState: AppState = {
   systemConfig: INITIAL_CONFIG
 };
 
+const LEGACY_BTC_DEFAULT = 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh';
+const LEGACY_STARTER_MIN = 100;
+const STARTER_MIN = 200;
+const LEGACY_STARTER_MAX = 1000;
+const STARTER_MAX = 2000;
+const WHALE_MIN = 10000;
+
 export const storageService = {
   getState: (): AppState => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -25,7 +32,41 @@ export const storageService = {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultState));
       return defaultState;
     }
-    return JSON.parse(saved);
+    const state: AppState = JSON.parse(saved);
+    let shouldSave = false;
+
+    state.systemConfig = {
+      ...INITIAL_CONFIG,
+      ...(state.systemConfig || {})
+    };
+    if (state.systemConfig.btcAddress === LEGACY_BTC_DEFAULT) {
+      state.systemConfig.btcAddress = INITIAL_CONFIG.btcAddress;
+      shouldSave = true;
+    }
+
+    state.plans = Array.isArray(state.plans) ? state.plans : [...INITIAL_PLANS];
+    const starter = state.plans.find((p) => p.id === 'plan-1' || p.name === 'Starter Tier');
+    if (starter) {
+      if (Number(starter.minAmount) !== STARTER_MIN) {
+        starter.minAmount = STARTER_MIN;
+        shouldSave = true;
+      }
+      if (Number(starter.maxAmount) !== STARTER_MAX) {
+        starter.maxAmount = STARTER_MAX;
+        shouldSave = true;
+      }
+    }
+
+    const whale = state.plans.find((p) => p.id === 'plan-3' || p.name === 'Whale Master Tier');
+    if (whale && Number(whale.minAmount) !== WHALE_MIN) {
+      whale.minAmount = WHALE_MIN;
+      shouldSave = true;
+    }
+
+    if (shouldSave) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+    return state;
   },
 
   saveState: (state: AppState) => {

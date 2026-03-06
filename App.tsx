@@ -130,73 +130,127 @@ const App: React.FC = () => {
 
   if (!state.currentUser) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-slate-950 relative overflow-hidden">
-        <div className="absolute top-0 -left-20 w-80 h-80 bg-blue-600/10 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-0 -right-20 w-96 h-96 bg-emerald-600/10 rounded-full blur-[150px]"></div>
-        
-        <div className="w-full max-w-md relative z-10">
-          <div className="text-center mb-10">
-            <h1 className="text-4xl font-extrabold text-white mb-2 tracking-tight">NEXUS CAPITAL</h1>
-            <p className="text-slate-500">Institutional Grade Crypto Investing</p>
-          </div>
+      <div className="min-h-screen bg-[#020b23] text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(45,212,191,0.2),transparent_40%),radial-gradient(circle_at_85%_25%,rgba(59,130,246,0.22),transparent_42%),linear-gradient(120deg,#020617_0%,#071945_45%,#031126_100%)]"></div>
+        <div className="absolute -top-24 -left-20 w-80 h-80 bg-cyan-400/20 blur-[140px] rounded-full"></div>
+        <div className="absolute bottom-0 -right-24 w-[28rem] h-[28rem] bg-blue-500/15 blur-[160px] rounded-full"></div>
 
-          <div className="glass border border-slate-800 p-8 rounded-3xl shadow-2xl">
-            <h2 className="text-2xl font-bold mb-6 text-center">
-              {isRegistering ? 'Create Account' : 'Welcome Back'}
-            </h2>
-            
-            <form onSubmit={handleAuth} className="space-y-4">
-              {isRegistering && (
-                <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-2">Full Name</label>
-                  <input 
-                    required
-                    type="text" 
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    placeholder="John Doe"
-                  />
-                </div>
-              )}
-              <div>
-                <label className="block text-sm font-medium text-slate-400 mb-2">Email Address</label>
-                <input 
-                  required
-                  type="email" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                  placeholder="name@company.com"
-                />
+        <div className="relative z-10 max-w-6xl mx-auto px-6 py-8 md:py-10">
+          <header className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-300 to-teal-500 flex items-center justify-center shadow-[0_0_30px_rgba(45,212,191,0.45)]">
+                <span className="text-slate-900 font-black text-lg">N</span>
               </div>
-              
-              <button 
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center space-x-2"
-              >
-                {loading ? (
-                  <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-                ) : (
-                  <span>{isRegistering ? 'Start Investing' : 'Login'}</span>
-                )}
-              </button>
-            </form>
-
-            <div className="mt-6 text-center">
-              <button 
-                onClick={() => setIsRegistering(!isRegistering)}
-                className="text-sm text-slate-500 hover:text-blue-400 transition-colors"
-              >
-                {isRegistering ? 'Already have an account? Login' : "Don't have an account? Sign up"}
-              </button>
+              <div>
+                <p className="text-2xl font-extrabold tracking-tight">Crypto</p>
+              </div>
             </div>
-          </div>
+            <div className="hidden md:flex items-center gap-3 text-sm text-slate-300">
+              <span className="px-3 py-2">Market</span>
+              <span className="px-3 py-2">Security</span>
+              <span className="px-3 py-2">Support</span>
+              <span className="px-3 py-2">Pricing</span>
+            </div>
+          </header>
 
-          <div className="mt-8 text-center text-xs text-slate-600">
+          <main className="mt-10 grid lg:grid-cols-2 gap-10 items-center">
+            <section>
+              <h1 className="text-5xl md:text-6xl font-black tracking-tight leading-tight">Invest Smarter</h1>
+              <p className="mt-5 text-slate-300 max-w-xl text-lg leading-relaxed">
+                Build long-term crypto wealth on a secure platform with clear portfolio tracking, advanced tools, and fast execution.
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsRegistering(true)}
+                className="mt-8 px-8 py-3 rounded-2xl text-lg font-semibold bg-gradient-to-r from-cyan-400 to-teal-500 text-slate-900 shadow-[0_14px_45px_rgba(45,212,191,0.35)] hover:brightness-110 transition"
+              >
+                Start for Crypto
+              </button>
+            </section>
+
+            <section className="relative">
+              <div className="hidden md:block absolute -top-20 right-10 w-72 h-72 rounded-full border border-cyan-300/40 bg-cyan-300/10 blur-[1px]"></div>
+              <div className="hidden md:block absolute -top-8 right-20 w-52 h-52 rounded-full bg-gradient-to-b from-cyan-300/20 to-transparent shadow-[0_0_80px_rgba(34,211,238,0.35)]"></div>
+
+              <div className="glass border border-cyan-200/20 rounded-3xl p-6 md:p-8 backdrop-blur-md bg-slate-950/45 shadow-[0_25px_90px_rgba(8,47,73,0.7)]">
+                <h2 className="text-2xl font-bold mb-1">{isRegistering ? 'Create Account' : 'Sign In'}</h2>
+                <p className="text-slate-300 text-sm mb-6">
+                  {isRegistering ? 'Join the platform and start investing today.' : 'Access your dashboard and portfolio instantly.'}
+                </p>
+
+                <form onSubmit={handleAuth} className="space-y-4">
+                  {isRegistering && (
+                    <div>
+                      <label className="block text-sm font-medium text-cyan-100/85 mb-2">Full Name</label>
+                      <input
+                        required
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full bg-slate-900/75 border border-cyan-300/20 rounded-xl px-4 py-3 text-white placeholder:text-slate-400 focus:ring-2 focus:ring-cyan-400/60 outline-none transition-all"
+                        placeholder="John Doe"
+                      />
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-sm font-medium text-cyan-100/85 mb-2">Email Address</label>
+                    <input
+                      required
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full bg-slate-900/75 border border-cyan-300/20 rounded-xl px-4 py-3 text-white placeholder:text-slate-400 focus:ring-2 focus:ring-cyan-400/60 outline-none transition-all"
+                      placeholder="name@company.com"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3 rounded-xl text-base font-bold bg-gradient-to-r from-cyan-400 to-teal-500 text-slate-900 shadow-[0_14px_40px_rgba(45,212,191,0.35)] hover:brightness-110 transition flex items-center justify-center"
+                  >
+                    {loading ? (
+                      <div className="w-5 h-5 border-2 border-slate-900/30 border-t-slate-900 rounded-full animate-spin"></div>
+                    ) : (
+                      <span>{isRegistering ? 'Create My Account' : 'Login'}</span>
+                    )}
+                  </button>
+                </form>
+
+                <div className="mt-6 text-center">
+                  <button
+                    onClick={() => setIsRegistering(!isRegistering)}
+                    className="text-sm text-cyan-200/90 hover:text-cyan-100 transition-colors"
+                  >
+                    {isRegistering ? 'Already have an account? Login' : "Don't have an account? Sign up"}
+                  </button>
+                </div>
+              </div>
+            </section>
+          </main>
+
+          <section className="mt-12 grid md:grid-cols-3 gap-5">
+            <article className="glass border border-cyan-200/15 rounded-2xl p-6 bg-slate-950/40">
+              <p className="text-cyan-300 text-sm font-semibold">Invest Security</p>
+              <h3 className="mt-3 text-2xl font-bold">Asset Protection</h3>
+              <p className="mt-3 text-slate-300 text-sm leading-relaxed">Enterprise controls and monitored wallets keep your investments protected around the clock.</p>
+            </article>
+            <article className="glass border border-cyan-200/15 rounded-2xl p-6 bg-slate-950/40">
+              <p className="text-cyan-300 text-sm font-semibold">Investing Engine</p>
+              <h3 className="mt-3 text-2xl font-bold">Smarter Strategy</h3>
+              <p className="mt-3 text-slate-300 text-sm leading-relaxed">Use structured plans, transparent returns, and fast execution to grow your crypto portfolio.</p>
+            </article>
+            <article className="glass border border-cyan-200/15 rounded-2xl p-6 bg-slate-950/40">
+              <p className="text-cyan-300 text-sm font-semibold">Client Wallet</p>
+              <h3 className="mt-3 text-2xl font-bold">Flexible Funding</h3>
+              <p className="mt-3 text-slate-300 text-sm leading-relaxed">Fund accounts quickly, track balances in real time, and submit withdrawals with confidence.</p>
+            </article>
+          </section>
+
+          <div className="mt-8 text-center text-xs text-slate-400">
             <p>Admin Email: admin@nexus.io</p>
-            <p className="mt-2">&copy; 2024 Nexus Crypto Capital. Secured by Blockchain.</p>
+            <p className="mt-2">&copy; 2026 Nexus Crypto Capital. Secured by Blockchain.</p>
           </div>
         </div>
       </div>

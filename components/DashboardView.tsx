@@ -1,7 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { User, Transaction, TransactionType, TransactionStatus } from '../types';
-import { getMarketSentiment } from '../services/geminiService';
 import { Tooltip, ResponsiveContainer, AreaChart, Area, LineChart, Line, XAxis, YAxis } from 'recharts';
 
 interface DashboardViewProps {
@@ -20,23 +19,10 @@ const data = [
 ];
 
 const DashboardView: React.FC<DashboardViewProps> = ({ user, transactions }) => {
-  const [sentiment, setSentiment] = useState<string>("Analyzing market conditions...");
   const [tvReachable, setTvReachable] = useState<boolean | null>(null);
   const [fallbackSeries, setFallbackSeries] = useState<Array<{ time: string; price: number }>>([]);
   const [fallbackError, setFallbackError] = useState<string>('');
   const userTransactions = transactions.filter(t => t.userId === user.id).slice(0, 5);
-
-  useEffect(() => {
-    const fetchSentiment = async () => {
-      try {
-        const text = await getMarketSentiment();
-        setSentiment(text || "Sentiment analysis currently unavailable.");
-      } catch (e) {
-        setSentiment("Market insight module is temporarily unavailable.");
-      }
-    };
-    fetchSentiment();
-  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -136,9 +122,9 @@ const DashboardView: React.FC<DashboardViewProps> = ({ user, transactions }) => 
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         {/* Balance Card */}
-        <div className="lg:col-span-2 glass border border-slate-800 p-6 rounded-2xl relative overflow-hidden">
+        <div className="glass border border-slate-800 p-6 rounded-2xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 blur-[100px] rounded-full -mr-32 -mt-32"></div>
           <div className="relative z-10">
             <h3 className="text-slate-400 mb-2">Total Portfolio Value</h3>
@@ -167,27 +153,6 @@ const DashboardView: React.FC<DashboardViewProps> = ({ user, transactions }) => 
           </div>
         </div>
 
-        {/* AI Insight Card */}
-        <div className="glass border border-slate-800 p-6 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800">
-          <div className="flex items-center space-x-2 mb-4">
-             <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center">
-               <i className="fas fa-brain text-white text-xs"></i>
-             </div>
-             <h3 className="font-bold">AI Market Sentiment</h3>
-          </div>
-          <p className="text-slate-300 text-sm leading-relaxed italic">
-            "{sentiment}"
-          </p>
-          <div className="mt-6 pt-6 border-t border-slate-700">
-             <div className="flex justify-between items-center mb-2">
-                <span className="text-xs text-slate-400 uppercase tracking-wider">Risk Level</span>
-                <span className="text-xs font-bold text-emerald-400">LOW</span>
-             </div>
-             <div className="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden">
-                <div className="bg-emerald-400 h-full w-1/4"></div>
-             </div>
-          </div>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

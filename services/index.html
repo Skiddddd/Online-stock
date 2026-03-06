@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gabby Invest</title>
+  <title>Online stock broking</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
@@ -227,9 +227,10 @@
   <div class="ambient-blob blob-a"></div>
   <div class="ambient-blob blob-b"></div>
   <button id="themeToggle" class="theme-toggle" type="button" aria-label="Enable light mode" title="Toggle theme"></button>
+  <div id="inlineErrorBanner" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-[80] w-[min(92vw,760px)] rounded-xl border border-rose-400/40 bg-rose-500/15 px-4 py-3 text-sm text-rose-100 shadow-[0_14px_40px_rgba(244,63,94,0.22)]"></div>
   <div id="app"></div>
 
-  <script>
+  <script type="module">
     const DB_KEY = "nexus_static_db_v1";
     const API_BASE_KEY = "NEXUS_API_BASE";
     const THEME_KEY = "NEXUS_THEME_MODE";
@@ -255,19 +256,28 @@
       ],
       transactions: [],
       plans: [
-        { id: "plan-1", name: "BTC Core Income", minAmount: 250, maxAmount: 5000, dailyRoi: 0.18, durationDays: 30, risk: "Low", strategy: "Market-neutral BTC basis and hedged carry." },
-        { id: "plan-2", name: "Blue Chip Momentum", minAmount: 5000, maxAmount: 25000, dailyRoi: 0.26, durationDays: 60, risk: "Medium", strategy: "Rotational exposure across BTC, ETH, and large-cap alts." },
-        { id: "plan-3", name: "Opportunistic Alpha", minAmount: 25000, maxAmount: 250000, dailyRoi: 0.34, durationDays: 90, risk: "High", strategy: "Actively managed swing allocation with strict drawdown controls." }
+        { id: "plan-1", name: "BTC Core Income", minAmount: 200, maxAmount: 2000, dailyRoi: 0.18, durationDays: 30, risk: "Low", strategy: "Market-neutral BTC basis and hedged carry." },
+        { id: "plan-2", name: "Blue Chip Momentum", minAmount: 1000, maxAmount: 25000, dailyRoi: 0.26, durationDays: 60, risk: "Medium", strategy: "Rotational exposure across BTC, ETH, and large-cap alts." },
+        { id: "plan-3", name: "Opportunistic Alpha", minAmount: 10000, maxAmount: 250000, dailyRoi: 0.34, durationDays: 90, risk: "High", strategy: "Actively managed swing allocation with strict drawdown controls." }
       ],
       systemConfig: {
-        btcAddress: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
-        ethAddress: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
-        usdtAddress: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F"
+        btcAddress: "bc1qynty8rdg8448dektk7yesd9ph0w08tfy7dav3y",
+        ethAddress: "0xf4059C384bAa6d60E426F91681F1e62A830E4Ec9",
+        usdtAddress: "0xf4059C384bAa6d60E426F91681F1e62A830E4Ec9"
       }
     };
 
     let activeTab = "dashboard";
     let isRegistering = false;
+    let authError = "";
+    const LEGACY_BTC_ADDRESS = "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh";
+    const LEGACY_EVM_ADDRESS = "0x71C7656EC7ab88b098defB751B7401B5f6d8976F";
+    const LEGACY_PLAN1_MIN = 250;
+    const PLAN1_MIN = 200;
+    const LEGACY_PLAN1_MAX = 5000;
+    const PLAN1_MAX = 2000;
+    const PLAN2_MIN = 1000;
+    const PLAN3_MIN = 10000;
 
     const readState = () => {
       const raw = localStorage.getItem(DB_KEY);
@@ -280,11 +290,44 @@
         const migrated = {
           ...DEFAULT_STATE,
           ...parsed,
+          systemConfig: {
+            ...DEFAULT_STATE.systemConfig,
+            ...(parsed.systemConfig || {})
+          },
           users: (Array.isArray(parsed.users) ? parsed.users : DEFAULT_STATE.users).map((u) => ({
             ...u,
-            password: u.password || (u.email === "admin@nexus.io" ? "Admin@123" : "User@123")
+            password: u.password || (u.email === "admin@nexus.io" ? "Admin@123" : "User@123"),
+            externalWallets: {
+              btc: "",
+              eth: "",
+              usdt: "",
+              ...((u && u.externalWallets) || {})
+            }
           }))
         };
+        migrated.plans = Array.isArray(migrated.plans) ? migrated.plans : [...DEFAULT_STATE.plans];
+        const starterPlan = migrated.plans.find((p) => p.id === "plan-1");
+        if (starterPlan) {
+          starterPlan.minAmount = PLAN1_MIN;
+          starterPlan.maxAmount = PLAN1_MAX;
+        }
+        const professionalPlan = migrated.plans.find((p) => p.id === "plan-2");
+        if (professionalPlan) {
+          professionalPlan.minAmount = PLAN2_MIN;
+        }
+        const whalePlan = migrated.plans.find((p) => p.id === "plan-3");
+        if (whalePlan) {
+          whalePlan.minAmount = PLAN3_MIN;
+        }
+        if (migrated.systemConfig?.btcAddress === LEGACY_BTC_ADDRESS) {
+          migrated.systemConfig.btcAddress = DEFAULT_STATE.systemConfig.btcAddress;
+        }
+        if (migrated.systemConfig?.ethAddress === LEGACY_EVM_ADDRESS) {
+          migrated.systemConfig.ethAddress = DEFAULT_STATE.systemConfig.ethAddress;
+        }
+        if (migrated.systemConfig?.usdtAddress === LEGACY_EVM_ADDRESS) {
+          migrated.systemConfig.usdtAddress = DEFAULT_STATE.systemConfig.usdtAddress;
+        }
         const adminUser = migrated.users.find((u) => (u.email || "").toLowerCase() === "admin@nexus.io");
         if (adminUser) {
           adminUser.fullName = "Gabriel Admin";
@@ -301,6 +344,58 @@
     const uid = () => Math.random().toString(36).slice(2, 11);
     const money = (n) => "$" + Number(n).toLocaleString();
     const normalizeEmail = (value) => String(value || "").trim().toLowerCase();
+    const showInlineError = (message) => {
+      const el = document.getElementById("inlineErrorBanner");
+      if (!el) return;
+      const text = message || "Something went wrong.";
+      const isInsufficientBalance = /insufficient balance/i.test(text);
+      el.textContent = text;
+      if (isInsufficientBalance) {
+        el.style.background = "linear-gradient(135deg, rgba(190,18,60,0.9), rgba(244,63,94,0.82))";
+        el.style.borderColor = "rgba(254,205,211,0.95)";
+        el.style.color = "#ffffff";
+        el.style.fontWeight = "800";
+        el.style.boxShadow = "0 18px 55px rgba(244,63,94,0.5)";
+        el.style.letterSpacing = "0.01em";
+      } else {
+        el.style.background = "";
+        el.style.borderColor = "";
+        el.style.color = "";
+        el.style.fontWeight = "";
+        el.style.boxShadow = "";
+        el.style.letterSpacing = "";
+      }
+      el.classList.remove("hidden");
+    };
+    const clearInlineError = () => {
+      const el = document.getElementById("inlineErrorBanner");
+      if (!el) return;
+      el.textContent = "";
+      el.style.background = "";
+      el.style.borderColor = "";
+      el.style.color = "";
+      el.style.fontWeight = "";
+      el.style.boxShadow = "";
+      el.style.letterSpacing = "";
+      el.classList.add("hidden");
+    };
+    const setWalletInlineMessage = (message, type = "error") => {
+      const el = document.getElementById("walletInlineMessage");
+      if (!el) return;
+      el.textContent = message || "";
+      el.classList.remove("hidden");
+      if (type === "success") {
+        el.className = "text-sm rounded-lg px-3 py-2 mb-4 bg-emerald-500/15 border border-emerald-400/40 text-emerald-200";
+      } else {
+        el.className = "text-sm rounded-lg px-3 py-2 mb-4 bg-rose-500/15 border border-rose-400/40 text-rose-200";
+      }
+    };
+    const clearWalletInlineMessage = () => {
+      const el = document.getElementById("walletInlineMessage");
+      if (!el) return;
+      el.textContent = "";
+      el.className = "hidden";
+    };
     const SUN_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>';
     const MOON_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a7.5 7.5 0 1 0 9 9 9 9 0 1 1-9-9z"></path></svg>';
 
@@ -456,7 +551,7 @@
       const db = readState();
       const user = db.users.find((u) => (u.email || "").toLowerCase() === email);
       if (!user) {
-        alert("Account not found.");
+        showInlineError("Account not found.");
         return false;
       }
 
@@ -468,7 +563,7 @@
         type: "password"
       })) || "";
       if (newPassword.length < 6) {
-        alert("Password must be at least 6 characters.");
+        showInlineError("Password must be at least 6 characters.");
         return false;
       }
 
@@ -503,8 +598,8 @@
         <div class="min-h-screen flex items-center justify-center p-6 relative z-10 page-motion">
           <div class="w-full max-w-md scene">
             <div class="text-center mb-8">
-              <h1 class="text-5xl font-extrabold brand-title">GABBY INVEST</h1>
-              <p class="text-slate-300 mt-2 tracking-wide">Institutional Grade Crypto Investing</p>
+              <h1 class="text-5xl md:text-6xl font-black brand-title tracking-tight">Online stock broking</h1>
+              <p class="text-slate-300 mt-2 tracking-wide">Professional online stock broking platform</p>
             </div>
             <div class="glass border border-slate-800 rounded-3xl p-8 tilt-card">
               <h2 class="text-2xl font-bold mb-6 text-center depth-layer">${isRegistering ? "Create Account" : "Welcome Back"}</h2>
@@ -535,6 +630,7 @@
                     </button>
                   </div>
                 </div>
+                ${!isRegistering && authError ? `<p class="text-sm text-rose-300 bg-rose-500/10 border border-rose-400/40 rounded-lg px-3 py-2">${authError}</p>` : ""}
                 <button class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl btn-3d tracking-wide">
                   ${isRegistering ? "Start Investing" : "Login"}
                 </button>
@@ -544,15 +640,13 @@
               </button>
               ${!isRegistering ? `<button id="forgotPassword" class="mt-2 text-sm text-slate-500 hover:text-emerald-300 w-full">Forgot Password?</button>` : ""}
             </div>
-            <div class="mt-6 text-center text-xs text-slate-500">
-              <p class="surface-chip inline-block px-3 py-1 rounded-full">Admin: admin@nexus.io / Admin@123</p>
-            </div>
           </div>
         </div>
       `;
 
       document.getElementById("toggleAuth").onclick = () => {
         isRegistering = !isRegistering;
+        authError = "";
         render();
       };
 
@@ -602,7 +696,7 @@
             const raw = await res.text();
             const data = raw ? JSON.parse(raw) : {};
             if (!res.ok) {
-              alert(data.error || `Could not process reset request (${res.status}).`);
+              showInlineError(data.error || `Could not process reset request (${res.status}).`);
               return;
             }
             alert("If the account exists, a reset link has been sent to your email.");
@@ -615,6 +709,7 @@
 
       document.getElementById("authForm").onsubmit = (e) => {
         e.preventDefault();
+        authError = "";
         const email = normalizeEmail(document.getElementById("email").value);
         const password = document.getElementById("password").value.trim();
         const db = readState();
@@ -624,11 +719,11 @@
           const fullName = document.getElementById("name").value.trim();
           if (!fullName) return;
           if (password.length < 6) {
-            alert("Password must be at least 6 characters.");
+            showInlineError("Password must be at least 6 characters.");
             return;
           }
           if (db.users.some((u) => (u.email || "").toLowerCase() === email)) {
-            alert("User already exists. Please login.");
+            showInlineError("User already exists. Please login.");
             return;
           }
           db.users.push({
@@ -641,6 +736,7 @@
             createdAt: new Date().toISOString()
           });
           db.currentUserId = db.users[db.users.length - 1].id;
+          authError = "";
           writeState(db);
           render();
           return;
@@ -667,9 +763,11 @@
           }
         }
         if (!user) {
-          alert("Invalid email or password.");
+          authError = "Invalid email or password.";
+          render();
           return;
         }
+        authError = "";
         db.currentUserId = user.id;
         writeState(db);
         render();
@@ -682,15 +780,11 @@
       const myTx = txs.filter(t => t.userId === user.id).slice(0, 6);
       return `
         <div class="space-y-6 scene">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="glass border border-slate-800 rounded-2xl p-6 md:col-span-2 tilt-card">
+          <div class="grid grid-cols-1 gap-6">
+            <div class="glass border border-slate-800 rounded-2xl p-6 tilt-card">
               <p class="text-slate-400 mb-2">Total Portfolio Value</p>
               <p class="text-4xl font-bold depth-layer">${money(user.balance)}</p>
               <p class="text-emerald-400 text-sm mt-2">+12.5% this month</p>
-            </div>
-            <div class="glass border border-slate-800 rounded-2xl p-6 tilt-card">
-              <p class="text-slate-400 mb-2">AI Market Sentiment</p>
-              <p class="text-sm text-slate-300">Market momentum remains constructive for BTC and ETH, while selective altcoin exposure is favored.</p>
             </div>
           </div>
           <div class="glass border border-slate-800 rounded-2xl p-6 tilt-card">
@@ -815,7 +909,13 @@
       `;
     }
 
-    function renderWallet(state) {
+    function renderWallet(state, user) {
+      const wallets = {
+        btc: "",
+        eth: "",
+        usdt: "",
+        ...((user && user.externalWallets) || {})
+      };
       return `
         <div class="space-y-6 scene">
           <h2 class="text-3xl font-bold">Funding & Wallet</h2>
@@ -847,7 +947,37 @@
             </div>
             <div class="glass border border-slate-800 rounded-2xl p-6 tilt-card">
               <h3 class="font-bold mb-3">Withdraw Funds</h3>
-              <p class="text-slate-400 text-sm mb-4">Request a withdrawal to your external wallet.</p>
+              <p class="text-slate-400 text-sm mb-4">Save your external wallet addresses below and use them for withdrawals.</p>
+              <p id="walletInlineMessage" class="hidden"></p>
+              <div class="space-y-3 mb-4">
+                <div>
+                  <label class="block text-xs text-slate-400 mb-1">External BTC Address</label>
+                  <input id="externalBtcInput" class="w-full bg-slate-900/60 border border-slate-700 rounded-lg p-2 text-sm" placeholder="bc1q..." value="${wallets.btc || ""}" />
+                </div>
+                <div>
+                  <label class="block text-xs text-slate-400 mb-1">External ETH Address</label>
+                  <input id="externalEthInput" class="w-full bg-slate-900/60 border border-slate-700 rounded-lg p-2 text-sm" placeholder="0x..." value="${wallets.eth || ""}" />
+                </div>
+                <div>
+                  <label class="block text-xs text-slate-400 mb-1">External USDT Address</label>
+                  <input id="externalUsdtInput" class="w-full bg-slate-900/60 border border-slate-700 rounded-lg p-2 text-sm" placeholder="0x..." value="${wallets.usdt || ""}" />
+                </div>
+              </div>
+              <button id="saveExternalWallets" class="w-full bg-slate-700 hover:bg-slate-600 py-2 rounded-lg font-bold btn-3d mb-3">Save External Addresses</button>
+              <div class="space-y-3 mb-3">
+                <div>
+                  <label class="block text-xs text-slate-400 mb-1">Withdrawal Asset</label>
+                  <select id="withdrawAssetSelect" class="w-full bg-slate-900/60 border border-slate-700 rounded-lg p-2 text-sm">
+                    <option value="BTC">BTC</option>
+                    <option value="ETH">ETH</option>
+                    <option value="USDT">USDT</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs text-slate-400 mb-1">Withdrawal Amount (USD)</label>
+                  <input id="withdrawAmountInput" type="number" min="1" step="0.01" class="w-full bg-slate-900/60 border border-slate-700 rounded-lg p-2 text-sm" placeholder="1000" />
+                </div>
+              </div>
               <button id="withdrawBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-2 rounded-lg font-bold btn-3d">Request Withdrawal</button>
             </div>
           </div>
@@ -972,7 +1102,7 @@
       let content = "";
       if (activeTab === "dashboard") content = renderDashboard(user, state.transactions);
       else if (activeTab === "invest") content = renderInvest(state, user);
-      else if (activeTab === "wallet") content = renderWallet(state);
+      else if (activeTab === "wallet") content = renderWallet(state, user);
       else if (activeTab === "transactions") content = renderTransactions(state, user);
       else if (isAdmin && activeTab === "admin-overview") content = renderAdmin(state, "overview");
       else if (isAdmin && activeTab === "admin-users") content = renderAdmin(state, "users");
@@ -984,7 +1114,7 @@
       app.innerHTML = `
         <div class="flex min-h-screen relative z-10">
           <aside class="hidden md:flex w-64 flex-col glass border-r border-slate-800 p-4 scene">
-            <h1 class="text-xl font-extrabold px-2 py-4 brand-title brand-font">GABBY INVEST</h1>
+            <h1 class="text-base md:text-2xl font-black px-2 py-4 brand-title brand-font tracking-tight">Online stock broking</h1>
           <div class="space-y-1 mt-4">
               ${items.map(([id, label]) => `
                 <button class="tabBtn btn-3d w-full text-left px-3 py-2 rounded-lg ${id === activeTab ? "bg-blue-600/30 text-blue-200 border-blue-400/35" : "hover:bg-slate-800/70 text-slate-300"}" data-tab="${id}">${label}</button>
@@ -1058,11 +1188,11 @@
           const value = Number(valueRaw);
           if (!value) return;
           if (value < plan.minAmount || value > plan.maxAmount) {
-            alert("Amount is outside plan limits.");
+            showInlineError("Amount is outside plan limits.");
             return;
           }
           if (value > currentUser(db).balance) {
-            alert("Insufficient balance.");
+            showInlineError("Insufficient balance.");
             return;
           }
           const projectedProfit = Number((value * (plan.dailyRoi / 100) * plan.durationDays).toFixed(2));
@@ -1110,35 +1240,52 @@
       }
 
       const withdrawBtn = document.getElementById("withdrawBtn");
-      if (withdrawBtn) {
-        withdrawBtn.onclick = async () => {
+      const saveExternalWallets = document.getElementById("saveExternalWallets");
+      if (saveExternalWallets) {
+        saveExternalWallets.onclick = () => {
+          clearWalletInlineMessage();
           const db = readState();
           const userNow = currentUser(db);
-          const amountRaw = await promptModal({
-            title: "Withdrawal Amount",
-            message: `Available balance: ${money(userNow.balance)}.`,
-            placeholder: "1000",
-            confirmLabel: "Continue",
-            type: "number"
-          });
-          const amount = Number(amountRaw);
+          userNow.externalWallets = {
+            btc: document.getElementById("externalBtcInput").value.trim(),
+            eth: document.getElementById("externalEthInput").value.trim(),
+            usdt: document.getElementById("externalUsdtInput").value.trim()
+          };
+          writeState(db);
+          setWalletInlineMessage("External withdrawal addresses saved.", "success");
+        };
+      }
+      if (withdrawBtn) {
+        withdrawBtn.onclick = async () => {
+          clearWalletInlineMessage();
+          const db = readState();
+          const userNow = currentUser(db);
+          const amount = Number(document.getElementById("withdrawAmountInput")?.value);
           if (!amount || amount <= 0) return;
           if (amount > userNow.balance) {
-            alert("Insufficient balance.");
+            setWalletInlineMessage("Insufficient balance.");
             return;
           }
-          const address = await promptModal({
-            title: "Destination Wallet",
-            message: "Enter the wallet address for the withdrawal.",
-            placeholder: "Wallet address",
-            confirmLabel: "Submit",
-            type: "text"
-          });
-          if (!address) return;
-          createTx(db, userNow.id, "WITHDRAWAL", amount, "To: " + address.slice(0, 10) + "...");
+          const asset = String(document.getElementById("withdrawAssetSelect")?.value || "").trim().toUpperCase();
+          if (!["BTC", "ETH", "USDT"].includes(asset)) {
+            setWalletInlineMessage("Please select BTC, ETH, or USDT.");
+            return;
+          }
+          const wallets = {
+            btc: "",
+            eth: "",
+            usdt: "",
+            ...((userNow && userNow.externalWallets) || {})
+          };
+          const destinationAddress = asset === "BTC" ? wallets.btc : asset === "ETH" ? wallets.eth : wallets.usdt;
+          if (!destinationAddress) {
+            setWalletInlineMessage(`Please save your external ${asset} address first.`);
+            return;
+          }
+          createTx(db, userNow.id, "WITHDRAWAL", amount, `${asset} To: ${destinationAddress.slice(0, 10)}...`);
           writeState(db);
-          alert("Withdrawal request submitted.");
-          render();
+          document.getElementById("withdrawAmountInput").value = "";
+          setWalletInlineMessage("Withdrawal request submitted.", "success");
         };
       }
 
@@ -1185,7 +1332,7 @@
           if (val === null) return;
           const num = Number(val);
           if (!Number.isFinite(num) || num < 0) {
-            alert("Invalid balance");
+            showInlineError("Invalid balance");
             return;
           }
           u.balance = num;
@@ -1241,6 +1388,7 @@
     }
 
     function render() {
+      clearInlineError();
       const state = readState();
       const user = currentUser(state);
       if (!user) return renderAuth(state);
@@ -1263,7 +1411,7 @@
           const raw = await res.text();
           const data = raw ? JSON.parse(raw) : {};
           if (!res.ok) {
-            alert(data.error || `Magic link is invalid or expired (${res.status}).`);
+            showInlineError(data.error || `Magic link is invalid or expired (${res.status}).`);
             return;
           }
 
@@ -1290,7 +1438,7 @@
           render();
           return;
         } catch {
-          alert(`Magic link service unavailable at ${API_BASE}.`);
+          showInlineError(`Magic link service unavailable at ${API_BASE}.`);
           return;
         }
       }
@@ -1305,7 +1453,7 @@
         type: "password"
       })) || "";
       if (newPassword.length < 6) {
-        alert("Password must be at least 6 characters.");
+        showInlineError("Password must be at least 6 characters.");
         return;
       }
 
@@ -1318,7 +1466,7 @@
         const raw = await res.text();
         const data = raw ? JSON.parse(raw) : {};
         if (!res.ok) {
-          alert(data.error || `Reset link is invalid or expired (${res.status}).`);
+          showInlineError(data.error || `Reset link is invalid or expired (${res.status}).`);
           return;
         }
 
