@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css' referrerpolicy='no-referrer' />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root {
@@ -448,7 +449,7 @@
         overlay.innerHTML = `
           <div class="glass border border-slate-800 rounded-2xl w-full max-w-md mx-4 p-6">
             <h3 class="text-lg font-semibold mb-2">${title || "Enter your account email"}</h3>
-            <p class="text-sm text-slate-400 mb-4">We’ll send a reset link if the account exists.</p>
+            <p class="text-sm text-slate-400 mb-4">Weâ€™ll send a reset link if the account exists.</p>
             <input id="modalEmailInput" type="email" class="input-luxe w-full rounded-xl px-4 py-3" placeholder="${placeholder || "name@company.com"}" />
             <div class="mt-4 flex gap-2 justify-end">
               <button id="modalCancel" class="btn-3d bg-slate-800/80 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm">Cancel</button>
@@ -543,10 +544,18 @@
           <div class="relative z-10 max-w-6xl mx-auto px-6 py-8 md:py-10">
             <header class="flex items-center justify-between gap-4">
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-300 to-teal-500 flex items-center justify-center shadow-[0_0_30px_rgba(45,212,191,0.45)]">
-                  <span class="text-slate-900 font-black text-lg">N</span>
+                <div class="w-10 h-10 rounded-full border-[3px] border-slate-200/90 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" class="w-6 h-6 text-slate-200" aria-hidden="true">
+                        <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="4" />
+                        <rect x="15" y="24" width="4" height="10" rx="1" fill="#34d399" />
+                        <rect x="22" y="18" width="4" height="16" rx="1" fill="#2dd4bf" />
+                        <rect x="29" y="14" width="4" height="20" rx="1" fill="#22c55e" />
+                    </svg>
                 </div>
-                <p class="text-2xl font-extrabold tracking-tight text-white">Crypto</p>
+                <div class="leading-[1.05]">
+                  <div class="text-slate-100 font-extrabold text-lg md:text-xl tracking-tight">Online</div>
+                  <div class="text-slate-200 font-semibold text-sm md:text-base tracking-tight">stock broking</div>
+                </div>
               </div>
               <div class="hidden md:flex items-center gap-3 text-sm text-slate-300">
                 <button id="authNavMarket" type="button" class="px-3 py-2 hover:text-cyan-200 transition-colors">Market</button>
@@ -560,7 +569,7 @@
                   Build long-term crypto wealth on a secure platform with clear portfolio tracking, advanced tools, and fast execution.
                 </p>
                 <button id="switchToRegister" type="button" class="mt-8 px-8 py-3 rounded-2xl text-lg font-semibold bg-gradient-to-r from-cyan-400 to-teal-500 text-slate-900 shadow-[0_14px_45px_rgba(45,212,191,0.35)] hover:brightness-110 transition">
-                  Start for Crypto
+                  Invest now
                 </button>
                 <button id="switchToLogin" type="button" class="mt-3 ml-3 px-7 py-3 rounded-2xl text-lg font-semibold border border-cyan-300/35 text-cyan-100 hover:bg-cyan-400/10 transition">
                   Sign In
@@ -571,6 +580,20 @@
             <div id="authModal" class="${authModalOpen ? "fixed" : "hidden"} inset-0 z-50 flex items-center justify-center px-4">
               <div id="authModalBackdrop" class="absolute inset-0 bg-slate-950/75 backdrop-blur-sm"></div>
               <div class="relative w-full max-w-md glass border border-cyan-200/20 rounded-3xl p-6 md:p-8 backdrop-blur-md bg-slate-950/55 shadow-[0_25px_90px_rgba(8,47,73,0.7)]">
+              <div id="authModalLogo" class="flex items-center justify-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-full border-[3px] border-slate-200/90 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" class="w-7 h-7 text-slate-200" aria-hidden="true">
+                    <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="4" />
+                    <rect x="15" y="24" width="4" height="10" rx="1" fill="#34d399" />
+                    <rect x="22" y="18" width="4" height="16" rx="1" fill="#2dd4bf" />
+                    <rect x="29" y="14" width="4" height="20" rx="1" fill="#22c55e" />
+                  </svg>
+                </div>
+                <div class="text-left leading-[1.05]">
+                  <div class="text-slate-100 font-extrabold text-xl tracking-tight">Online</div>
+                  <div class="text-slate-200 font-semibold text-base tracking-tight">stock broking</div>
+                </div>
+              </div>
                 <div class="flex items-center justify-between mb-2">
                   <h2 class="text-2xl font-bold text-white">${isRegistering ? "Create Account" : "Sign In"}</h2>
                   <button id="closeAuthModal" type="button" class="text-slate-400 hover:text-slate-200 text-xl leading-none">&times;</button>
@@ -1200,7 +1223,20 @@
       app.innerHTML = `
         <div class="flex min-h-screen relative z-10">
           <aside class="hidden md:flex w-64 flex-col glass border-r border-slate-800 p-4 scene">
-            <h1 class="text-base md:text-2xl font-black px-2 py-4 brand-title brand-font tracking-tight">Online stock broking</h1>
+            <div class="flex items-center gap-3 px-2 py-4">
+              <div class="w-10 h-10 rounded-full border-[3px] border-slate-200/90 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" class="w-6 h-6 text-slate-200" aria-hidden="true">
+                      <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="4" />
+                      <rect x="15" y="24" width="4" height="10" rx="1" fill="#34d399" />
+                      <rect x="22" y="18" width="4" height="16" rx="1" fill="#2dd4bf" />
+                      <rect x="29" y="14" width="4" height="20" rx="1" fill="#22c55e" />
+                  </svg>
+              </div>
+              <div class="leading-[1.05]">
+                <div class="text-slate-100 font-extrabold text-lg md:text-xl tracking-tight">Online</div>
+                <div class="text-slate-200 font-semibold text-sm md:text-base tracking-tight">stock broking</div>
+              </div>
+            </div>
           <div class="space-y-1 mt-4">
               ${items.map(([id, label]) => `
                 <button class="tabBtn btn-3d w-full text-left px-3 py-2 rounded-lg ${id === activeTab ? "bg-blue-600/30 text-blue-200 border-blue-400/35" : "hover:bg-slate-800/70 text-slate-300"}" data-tab="${id}">${label}</button>
@@ -1215,7 +1251,7 @@
             <div class="md:hidden glass border border-slate-800 rounded-2xl p-3 mb-4">
               <div class="flex items-center justify-end gap-2">
                 <div class="flex items-center gap-2">
-                  <button id="mobileMenuBtn" class="btn-3d bg-slate-800/80 hover:bg-slate-700 text-slate-100 px-3 py-2 rounded-lg text-sm border border-slate-600/40" aria-expanded="false" aria-controls="mobileMenuPanel">☰ Menu</button>
+                  <button id="mobileMenuBtn" class="btn-3d bg-slate-800/80 hover:bg-slate-700 text-slate-100 px-3 py-2 rounded-lg text-sm border border-slate-600/40" aria-expanded="false" aria-controls="mobileMenuPanel">â˜° Menu</button>
                   <button class="logoutBtn bg-red-600/80 hover:bg-red-600 py-2 px-3 rounded-lg btn-3d text-sm">Logout</button>
                 </div>
               </div>

@@ -598,7 +598,20 @@
         <div class="min-h-screen flex items-center justify-center p-6 relative z-10 page-motion">
           <div class="w-full max-w-md scene">
             <div class="text-center mb-8">
-              <h1 class="text-5xl md:text-6xl font-black brand-title tracking-tight">Online stock broking</h1>
+              <div class="flex items-center justify-center gap-3">
+  <div class="w-16 h-16 rounded-full border-[4px] border-slate-200/90 flex items-center justify-center">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" class="w-9 h-9 text-slate-200">
+      <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="4" />
+      <rect x="15" y="24" width="4" height="10" rx="1" fill="#34d399" />
+      <rect x="22" y="18" width="4" height="16" rx="1" fill="#2dd4bf" />
+      <rect x="29" y="14" width="4" height="20" rx="1" fill="#22c55e" />
+    </svg>
+  </div>
+  <div class="text-left leading-[1.05]">
+    <div class="text-4xl md:text-5xl font-black tracking-tight text-slate-100">Online</div>
+    <div class="text-2xl md:text-3xl font-semibold tracking-tight text-slate-200">stock broking</div>
+  </div>
+</div>
               <p class="text-slate-300 mt-2 tracking-wide">Professional online stock broking platform</p>
             </div>
             <div class="glass border border-slate-800 rounded-3xl p-8 tilt-card">
@@ -1114,7 +1127,20 @@
       app.innerHTML = `
         <div class="flex min-h-screen relative z-10">
           <aside class="hidden md:flex w-64 flex-col glass border-r border-slate-800 p-4 scene">
-            <h1 class="text-base md:text-2xl font-black px-2 py-4 brand-title brand-font tracking-tight">Online stock broking</h1>
+            <div class="flex items-center gap-3 px-2 py-4">
+  <div class="w-10 h-10 rounded-full border-[3px] border-slate-200/90 flex items-center justify-center">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" class="w-6 h-6 text-slate-200">
+      <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="4" />
+      <rect x="15" y="24" width="4" height="10" rx="1" fill="#34d399" />
+      <rect x="22" y="18" width="4" height="16" rx="1" fill="#2dd4bf" />
+      <rect x="29" y="14" width="4" height="20" rx="1" fill="#22c55e" />
+    </svg>
+  </div>
+  <div class="leading-[1.05]">
+    <div class="text-slate-100 font-extrabold text-lg md:text-xl tracking-tight">Online</div>
+    <div class="text-slate-200 font-semibold text-sm md:text-base tracking-tight">stock broking</div>
+  </div>
+</div>
           <div class="space-y-1 mt-4">
               ${items.map(([id, label]) => `
                 <button class="tabBtn btn-3d w-full text-left px-3 py-2 rounded-lg ${id === activeTab ? "bg-blue-600/30 text-blue-200 border-blue-400/35" : "hover:bg-slate-800/70 text-slate-300"}" data-tab="${id}">${label}</button>

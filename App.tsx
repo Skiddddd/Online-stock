@@ -1,4 +1,4 @@
-
+﻿
 import React, { useState, useEffect, useCallback } from 'react';
 import { AppState, TransactionStatus, TransactionType, UserRole, SystemConfig } from './types';
 import { storageService } from './services/storageService';
@@ -138,13 +138,19 @@ const App: React.FC = () => {
         <div className="relative z-10 max-w-6xl mx-auto px-6 py-8 md:py-10">
           <header className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-300 to-teal-500 flex items-center justify-center shadow-[0_0_30px_rgba(45,212,191,0.45)]">
-                <span className="text-slate-900 font-black text-lg">N</span>
-              </div>
-              <div>
-                <p className="text-2xl font-extrabold tracking-tight">Crypto</p>
-              </div>
-            </div>
+  <div className="w-10 h-10 rounded-full border-[3px] border-slate-200/90 flex items-center justify-center">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="w-6 h-6 text-slate-200" aria-hidden="true">
+      <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" strokeWidth={4} />
+      <rect x="15" y="24" width="4" height="10" rx="1" fill="#34d399" />
+      <rect x="22" y="18" width="4" height="16" rx="1" fill="#2dd4bf" />
+      <rect x="29" y="14" width="4" height="20" rx="1" fill="#22c55e" />
+    </svg>
+  </div>
+  <div className="leading-[1.05]">
+    <div className="text-slate-100 font-extrabold text-lg md:text-xl tracking-tight">Online</div>
+    <div className="text-slate-200 font-semibold text-sm md:text-base tracking-tight">stock broking</div>
+  </div>
+</div>
             <div className="hidden md:flex items-center gap-3 text-sm text-slate-300">
               <span className="px-3 py-2">Market</span>
               <span className="px-3 py-2">Security</span>
@@ -164,7 +170,7 @@ const App: React.FC = () => {
                 onClick={() => setIsRegistering(true)}
                 className="mt-8 px-8 py-3 rounded-2xl text-lg font-semibold bg-gradient-to-r from-cyan-400 to-teal-500 text-slate-900 shadow-[0_14px_45px_rgba(45,212,191,0.35)] hover:brightness-110 transition"
               >
-                Start for Crypto
+                Invest now
               </button>
             </section>
 
