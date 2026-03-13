@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { User, UserRole } from '../types';
 
@@ -16,96 +15,83 @@ const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, activeTab, se
   const isAdmin = user.role === UserRole.ADMIN;
 
   const userMenuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: 'fa-chart-pie' },
+    { id: 'dashboard', label: 'Dashboard', icon: 'fa-chart-line' },
     { id: 'invest', label: 'Invest', icon: 'fa-rocket' },
-    { id: 'transactions', label: 'Transactions', icon: 'fa-history' },
-    { id: 'wallet', label: 'Wallet', icon: 'fa-wallet' },
-    { id: 'ai-advisor', label: 'AI Advisor', icon: 'fa-brain' },
+    { id: 'transactions', label: 'Transactions', icon: 'fa-star' },
+    { id: 'wallet', label: 'Wallet', icon: 'fa-folder' },
+    { id: 'ai-advisor', label: 'AI Advisor', icon: 'fa-magnifying-glass' }
   ];
 
   const adminMenuItems = [
-    { id: 'admin-overview', label: 'System Overview', icon: 'fa-shield-halved' },
-    { id: 'admin-users', label: 'Manage Users', icon: 'fa-users' },
-    { id: 'admin-tx', label: 'Approve Payments', icon: 'fa-check-double' },
-    { id: 'admin-settings', label: 'Settings', icon: 'fa-cog' },
+    { id: 'admin-overview', label: 'Overview', icon: 'fa-shield-halved' },
+    { id: 'admin-users', label: 'Users', icon: 'fa-users' },
+    { id: 'admin-tx', label: 'Approvals', icon: 'fa-check-double' },
+    { id: 'admin-settings', label: 'Settings', icon: 'fa-gear' }
   ];
 
-  // Filter out the 'invest' option for admins
-  const filteredUserItems = isAdmin 
-    ? userMenuItems.filter(item => item.id !== 'invest') 
-    : userMenuItems;
-
+  const filteredUserItems = isAdmin ? userMenuItems.filter((item) => item.id !== 'invest') : userMenuItems;
   const items = isAdmin ? [...filteredUserItems, ...adminMenuItems] : userMenuItems;
 
   return (
-    <div className="flex h-screen bg-slate-950 overflow-hidden">
-      {/* Sidebar */}
-      <aside className="w-64 glass border-r border-slate-800 hidden md:flex flex-col">
-        <div className="p-6">
-          <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
-            NEXUS CAPITAL
-          </h1>
-        </div>
-        
-        <nav className="flex-1 px-4 space-y-1 mt-4">
-          {items.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
-                activeTab === item.id 
-                  ? 'bg-blue-600/20 text-blue-400 border-r-4 border-blue-500' 
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-              }`}
-            >
-              <i className={`fas ${item.icon} w-5`}></i>
-              <span className="font-medium">{item.label}</span>
-            </button>
-          ))}
-        </nav>
+    <div className="min-h-screen bg-[#e7e7ea] p-2 md:p-8 flex items-center justify-center text-white">
+      <div className="w-full max-w-[1320px] h-[86vh] min-h-[680px] rounded-[18px] overflow-hidden shadow-[0_22px_70px_rgba(8,8,25,0.34)] border border-violet-950/50 bg-[#120028] flex">
+        <div className="flex-1 min-w-0 flex flex-col">
+          <header className="h-[78px] bg-[#1a0038] border-b border-violet-900/50 px-5 md:px-8 flex items-center justify-between">
+            <div className="flex items-center gap-4 min-w-0">
+              <button className="text-violet-200/90 hover:text-white" aria-label="Menu">
+                <i className="fas fa-ellipsis-v"></i>
+              </button>
+              <div className="hidden sm:flex items-center h-10 bg-white rounded-full px-4 min-w-[260px] md:min-w-[360px]">
+                <i className="fas fa-search text-amber-500 text-xs mr-3"></i>
+                <input className="w-full text-sm text-slate-700 bg-transparent outline-none" placeholder="Search" aria-label="Search" />
+              </div>
+            </div>
+            <div className="text-right leading-tight">
+              <p className="text-sm text-violet-200/85">Hello,</p>
+              <p className="text-[38px] md:text-[42px] font-black">Welcome!!</p>
+            </div>
+          </header>
 
-        <div className="p-4 border-t border-slate-800">
-          <div className="flex items-center space-x-3 p-3 glass rounded-xl mb-4">
-            <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center font-bold">
-              {user.fullName[0]}
+          <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
+        </div>
+
+        <aside className="w-[120px] md:w-[190px] bg-[#020b16] border-l border-violet-900/50 flex flex-col items-center py-8 px-3">
+          <div className="relative">
+            <div className="w-24 h-24 rounded-full bg-white text-orange-500 flex items-center justify-center text-5xl">
+              <i className="fas fa-user-circle"></i>
             </div>
-            <div className="flex-1 overflow-hidden">
-              <p className="text-sm font-semibold truncate">{user.fullName}</p>
-              <p className="text-xs text-slate-500 truncate">{user.role}</p>
-            </div>
+            <span className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-orange-500 text-white text-[10px] font-bold flex items-center justify-center border-2 border-[#020b16]">1</span>
           </div>
-          <button 
+
+          <div className="mt-4 text-center">
+            <p className="text-3xl md:text-[36px] font-semibold leading-none">John Doe</p>
+            <p className="text-slate-400 text-sm mt-1">{isAdmin ? 'Admin' : 'User'}</p>
+          </div>
+
+          <nav className="mt-8 flex-1 flex flex-col items-center gap-5 overflow-y-auto w-full">
+            {items.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                title={item.label}
+                className={`w-11 h-11 rounded-md flex items-center justify-center transition ${
+                  activeTab === item.id ? 'bg-orange-500 text-white' : 'text-white/90 hover:bg-white/10'
+                }`}
+              >
+                <i className={`fas ${item.icon}`}></i>
+              </button>
+            ))}
+          </nav>
+
+          <button
             onClick={onLogout}
-            className="w-full flex items-center space-x-3 px-4 py-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+            className="mt-4 w-11 h-11 rounded-md flex items-center justify-center text-white/90 hover:bg-red-500/20"
+            title="Logout"
           >
-            <i className="fas fa-sign-out-alt"></i>
-            <span>Logout</span>
+            <i className="fas fa-right-from-bracket"></i>
           </button>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-y-auto relative">
-        <header className="h-16 glass border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-10">
-          <div className="md:hidden font-bold text-blue-400">NEXUS</div>
-          <div className="text-slate-400 text-sm hidden md:block">
-            Market Status: <span className="text-emerald-400">Live</span>
-          </div>
-          <div className="flex items-center space-x-6">
-             <div className="text-right">
-                <p className="text-xs text-slate-500">Balance</p>
-                <p className="text-lg font-bold text-white">${user.balance.toLocaleString()}</p>
-             </div>
-             <button className="p-2 glass rounded-lg hover:bg-slate-800 transition-colors">
-               <i className="fas fa-bell"></i>
-             </button>
-          </div>
-        </header>
-
-        <div className="p-4 md:p-8">
-          {children}
-        </div>
-      </main>
+        </aside>
+      </div>
     </div>
   );
 };

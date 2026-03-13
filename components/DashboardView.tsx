@@ -1,270 +1,120 @@
-
-import React, { useEffect, useState } from 'react';
-import { User, Transaction, TransactionType, TransactionStatus } from '../types';
-import { Tooltip, ResponsiveContainer, AreaChart, Area, LineChart, Line, XAxis, YAxis } from 'recharts';
+import React from 'react';
+import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts';
+import { User, Transaction } from '../types';
 
 interface DashboardViewProps {
   user: User;
   transactions: Transaction[];
 }
 
-const data = [
-  { name: 'Mon', val: 4000 },
-  { name: 'Tue', val: 3000 },
-  { name: 'Wed', val: 5000 },
-  { name: 'Thu', val: 4500 },
-  { name: 'Fri', val: 6000 },
-  { name: 'Sat', val: 5500 },
-  { name: 'Sun', val: 7000 },
+const waveData = [
+  { day: 'Mon', x: 45, y: 18, z: 28 },
+  { day: 'Tue', x: 34, y: 24, z: 20 },
+  { day: 'Wed', x: 29, y: 16, z: 26 },
+  { day: 'Thu', x: 36, y: 21, z: 22 },
+  { day: 'Fri', x: 24, y: 33, z: 30 },
+  { day: 'Sat', x: 31, y: 28, z: 27 },
+  { day: 'Sun', x: 42, y: 25, z: 34 }
+];
+
+const bars = [
+  { title: 'TEXT TITLE', value: 64, color: 'bg-violet-400' },
+  { title: 'TEXT TITLE', value: 58, color: 'bg-blue-400' },
+  { title: 'TEXT TITLE', value: 61, color: 'bg-amber-300' },
+  { title: 'TEXT TITLE', value: 60, color: 'bg-yellow-300' }
 ];
 
 const DashboardView: React.FC<DashboardViewProps> = ({ user, transactions }) => {
-  const [tvReachable, setTvReachable] = useState<boolean | null>(null);
-  const [fallbackSeries, setFallbackSeries] = useState<Array<{ time: string; price: number }>>([]);
-  const [fallbackError, setFallbackError] = useState<string>('');
-  const userTransactions = transactions.filter(t => t.userId === user.id).slice(0, 5);
-
-  useEffect(() => {
-    let mounted = true;
-
-    const timeout = window.setTimeout(() => {
-      if (mounted) setTvReachable(false);
-    }, 4500);
-
-    fetch('https://s.tradingview.com/favicon.ico', { mode: 'no-cors', cache: 'no-store' })
-      .then(() => {
-        if (mounted) setTvReachable(true);
-      })
-      .catch(() => {
-        if (mounted) setTvReachable(false);
-      })
-      .finally(() => {
-        window.clearTimeout(timeout);
-      });
-
-    return () => {
-      mounted = false;
-      window.clearTimeout(timeout);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (tvReachable !== false) return;
-
-    let mounted = true;
-    const loadFallback = async () => {
-      try {
-        setFallbackError('');
-        const viteEnv = (import.meta as ImportMeta & { env?: Record<string, string> }).env;
-        const apiBase = (viteEnv?.VITE_API_BASE_URL || 'http://localhost:4000').replace(/\/$/, '');
-        let points: Array<{ ts: number; price: number }> = [];
-
-        try {
-          const res = await fetch(`${apiBase}/api/market/btc-history`);
-          if (!res.ok) throw new Error('backend unavailable');
-          const payload = (await res.json()) as { points?: Array<{ ts: number; price: number }> };
-          points = Array.isArray(payload.points) ? payload.points : [];
-        } catch {
-          const res = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=3&interval=hourly');
-          if (!res.ok) throw new Error('fallback provider unavailable');
-          const payload = (await res.json()) as { prices?: Array<[number, number]> };
-          const raw = Array.isArray(payload.prices) ? payload.prices : [];
-          points = raw.map((p) => ({ ts: Number(p[0]), price: Number(p[1]) }));
-        }
-
-        const series = points.slice(-72).map((point) => ({
-          time: new Date(point.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          price: point.price
-        }));
-
-        if (mounted) setFallbackSeries(series);
-      } catch {
-        if (mounted) setFallbackError('Live chart is unavailable on this network.');
-      }
-    };
-
-    loadFallback();
-    return () => {
-      mounted = false;
-    };
-  }, [tvReachable]);
-
-  const marketCoins = [
-    { 
-      name: 'Bitcoin', 
-      symbol: 'BTC', 
-      price: '94,231.02', 
-      change: '+2.4%', 
-      icon: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=040' 
-    },
-    { 
-      name: 'Ethereum', 
-      symbol: 'ETH', 
-      price: '2,431.15', 
-      change: '-0.8%', 
-      icon: 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=040' 
-    },
-    { 
-      name: 'Solana', 
-      symbol: 'SOL', 
-      price: '143.55', 
-      change: '+5.2%', 
-      icon: 'https://cryptologos.cc/logos/solana-sol-logo.png?v=040' 
-    },
-    { 
-      name: 'Cardano', 
-      symbol: 'ADA', 
-      price: '0.45', 
-      change: '+1.1%', 
-      icon: 'https://cryptologos.cc/logos/cardano-ada-logo.png?v=040' 
-    },
-  ];
+  const recent = transactions.filter((t) => t.userId === user.id).slice(0, 3);
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-6">
-        {/* Balance Card */}
-        <div className="glass border border-slate-800 p-6 rounded-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 blur-[100px] rounded-full -mr-32 -mt-32"></div>
-          <div className="relative z-10">
-            <h3 className="text-slate-400 mb-2">Total Portfolio Value</h3>
-            <div className="flex items-baseline space-x-2">
-              <span className="text-4xl font-bold">${user.balance.toLocaleString()}</span>
-              <span className="text-emerald-400 text-sm font-medium">+12.5% this month</span>
-            </div>
-            
-            <div className="mt-8 h-48 w-full">
-               <ResponsiveContainer width="100%" height="100%">
-                 <AreaChart data={data}>
-                    <defs>
-                      <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }}
-                      itemStyle={{ color: '#fff' }}
-                    />
-                    <Area type="monotone" dataKey="val" stroke="#3b82f6" fillOpacity={1} fill="url(#colorVal)" />
-                 </AreaChart>
-               </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
+    <div className="space-y-5">
+      <h2 className="text-[30px] font-bold"><span className="font-black">Dashboard:</span> Project Name</h2>
 
-      </div>
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <section className="xl:col-span-2 rounded-xl border border-violet-900/50 bg-[#1a0038] p-5 min-h-[260px]">
+          <h3 className="text-[34px] font-semibold leading-none">Chart title here</h3>
+          <p className="text-[11px] text-violet-200/70 mt-1">Lorem ipsum</p>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Activity */}
-        <div className="glass border border-slate-800 rounded-2xl overflow-hidden">
-          <div className="p-6 border-b border-slate-800 flex justify-between items-center">
-            <h3 className="font-bold">Recent Transactions</h3>
-            <button className="text-xs text-blue-400 hover:underline">View All</button>
+          <div className="h-[190px] mt-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={waveData}>
+                <defs>
+                  <linearGradient id="softA" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f9d8b0" stopOpacity={0.95} />
+                    <stop offset="95%" stopColor="#f9d8b0" stopOpacity={0.02} />
+                  </linearGradient>
+                  <linearGradient id="softB" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#bc7cff" stopOpacity={0.85} />
+                    <stop offset="95%" stopColor="#bc7cff" stopOpacity={0.02} />
+                  </linearGradient>
+                  <linearGradient id="softC" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2f55ff" stopOpacity={0.85} />
+                    <stop offset="95%" stopColor="#2f55ff" stopOpacity={0.02} />
+                  </linearGradient>
+                </defs>
+                <Tooltip
+                  contentStyle={{ background: '#13022c', border: '1px solid #4c1d95', borderRadius: 10 }}
+                  labelStyle={{ color: '#ddd6fe' }}
+                />
+                <Area type="monotone" dataKey="x" stroke="#f9d8b0" fill="url(#softA)" strokeWidth={2} />
+                <Area type="monotone" dataKey="y" stroke="#bc7cff" fill="url(#softB)" strokeWidth={2} />
+                <Area type="monotone" dataKey="z" stroke="#2f55ff" fill="url(#softC)" strokeWidth={2} />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
-          <div className="divide-y divide-slate-800">
-            {userTransactions.length > 0 ? userTransactions.map(tx => (
-              <div key={tx.id} className="p-4 flex items-center justify-between hover:bg-slate-800/50 transition-colors">
-                <div className="flex items-center space-x-3">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    tx.type === TransactionType.DEPOSIT ? 'bg-emerald-500/10 text-emerald-500' : 
-                    tx.type === TransactionType.WITHDRAWAL ? 'bg-blue-500/10 text-blue-500' : 'bg-red-500/10 text-red-500'
-                  }`}>
-                    <i className={`fas ${tx.type === TransactionType.DEPOSIT ? 'fa-arrow-down' : tx.type === TransactionType.WITHDRAWAL ? 'fa-arrow-up' : 'fa-rocket'}`}></i>
-                  </div>
-                  <div>
-                    <p className="font-medium capitalize">{tx.type.toLowerCase()}</p>
-                    <p className="text-xs text-slate-500">{new Date(tx.date).toLocaleDateString()}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className={`font-bold ${tx.type === TransactionType.DEPOSIT ? 'text-emerald-400' : 'text-slate-100'}`}>
-                    {tx.type === TransactionType.DEPOSIT ? '+' : '-'}${tx.amount.toLocaleString()}
-                  </p>
-                  <p className={`text-[10px] uppercase font-bold ${
-                    tx.status === TransactionStatus.COMPLETED ? 'text-emerald-500' : tx.status === TransactionStatus.PENDING ? 'text-amber-500' : 'text-red-500'
-                  }`}>
-                    {tx.status}
-                  </p>
+        </section>
+
+        <section className="rounded-xl border border-violet-900/50 bg-[#1a0038] p-5 min-h-[260px]">
+          <h3 className="text-[34px] font-semibold leading-none">Chart title here</h3>
+          <p className="text-[11px] text-violet-200/70 mt-1">Lorem ipsum</p>
+          <div className="mt-8 space-y-5">
+            {bars.map((b) => (
+              <div key={`${b.title}-${b.value}`}>
+                <p className="text-[11px] font-semibold text-white/90 mb-2">{b.title}</p>
+                <div className="h-1.5 rounded-full bg-white/30 relative">
+                  <div className={`h-full rounded-full ${b.color}`} style={{ width: `${b.value}%` }}></div>
+                  <span className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white border border-black/20" style={{ left: `calc(${b.value}% - 6px)` }}></span>
                 </div>
               </div>
-            )) : (
-              <div className="p-8 text-center text-slate-500">No transactions yet.</div>
-            )}
+            ))}
           </div>
-        </div>
+        </section>
+      </div>
 
-        {/* Live Prices */}
-        <div className="glass border border-slate-800 rounded-2xl overflow-hidden">
-           <div className="p-6 border-b border-slate-800">
-             <h3 className="font-bold">Live BTC/USDT Chart</h3>
-           </div>
-           <div className="p-4 space-y-4">
-             {tvReachable !== false && (
-               <div className="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
-                 <iframe
-                   title="BTCUSDT TradingView Chart"
-                   className="w-full"
-                   style={{ height: 280, border: 0 }}
-                   src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_btc&symbol=BINANCE:BTCUSDT&interval=60&hidesidetoolbar=1&symboledit=0&saveimage=0&toolbarbg=0f172a&studies=%5B%5D&theme=dark&style=1&timezone=Etc%2FUTC&locale=en"
-                   scrolling="no"
-                   allowFullScreen
-                   onError={() => setTvReachable(false)}
-                 />
-               </div>
-             )}
-             {tvReachable === false && fallbackSeries.length > 0 && (
-               <div className="rounded-xl border border-slate-800 bg-slate-950 p-3">
-                 <p className="text-xs text-amber-400 mb-2">TradingView unavailable. Showing fallback feed.</p>
-                 <div className="h-56 w-full">
-                   <ResponsiveContainer width="100%" height="100%">
-                     <LineChart data={fallbackSeries}>
-                       <XAxis dataKey="time" tick={{ fill: '#94a3b8', fontSize: 10 }} minTickGap={28} />
-                       <YAxis tick={{ fill: '#94a3b8', fontSize: 10 }} tickFormatter={(v) => `$${Math.round(Number(v) / 1000)}k`} />
-                       <Tooltip
-                         contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }}
-                         labelStyle={{ color: '#94a3b8' }}
-                       />
-                       <Line type="monotone" dataKey="price" stroke="#22c55e" strokeWidth={2} dot={false} />
-                     </LineChart>
-                   </ResponsiveContainer>
-                 </div>
-               </div>
-             )}
-             {tvReachable === false && fallbackSeries.length === 0 && !fallbackError && (
-               <div className="rounded-xl border border-slate-800 bg-slate-950 h-56 flex items-center justify-center text-slate-500 text-sm">
-                 Loading fallback chart...
-               </div>
-             )}
-             {tvReachable === false && fallbackError && (
-               <div className="rounded-xl border border-slate-800 bg-slate-950 h-56 flex items-center justify-center text-red-400 text-sm text-center px-4">
-                 {fallbackError}
-               </div>
-             )}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <section className="xl:col-span-2 rounded-xl border border-violet-900/50 bg-[#1a0038] p-5 min-h-[255px] relative overflow-hidden">
+          <h3 className="text-[34px] font-semibold leading-none">Chart title here</h3>
+          <p className="text-[11px] text-violet-200/70 mt-1">Lorem ipsum</p>
+          <div className="absolute inset-0 opacity-35 bg-[radial-gradient(circle_at_55%_62%,rgba(255,255,255,0.72),transparent_11%),linear-gradient(115deg,transparent_0%,#3f17a8_58%,#2f1a7b_100%)]"></div>
+          <div className="absolute inset-x-0 top-1/2 border-t border-white/40"></div>
+          <div className="absolute inset-y-0 left-1/2 border-l border-white/40"></div>
+          <div className="absolute left-6 bottom-4 text-[90px] leading-none font-black text-white/10">WORLD</div>
+        </section>
 
-             <div className="space-y-2">
-               {marketCoins.map(coin => (
-                 <div key={coin.symbol} className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-800 transition-colors cursor-pointer">
-                   <div className="flex items-center space-x-3">
-                      <div className="w-9 h-9 rounded-lg bg-slate-900 flex items-center justify-center p-2 border border-slate-800">
-                        <img src={coin.icon} alt={coin.name} className="w-full h-full object-contain" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-sm">{coin.name}</p>
-                        <p className="text-xs text-slate-500">{coin.symbol}</p>
-                      </div>
-                   </div>
-                   <div className="text-right">
-                      <p className="font-bold text-sm">${coin.price}</p>
-                      <p className={`text-xs ${coin.change.startsWith('+') ? 'text-emerald-400' : 'text-red-400'}`}>
-                        {coin.change}
-                      </p>
-                   </div>
-                 </div>
-               ))}
-             </div>
-           </div>
-        </div>
+        <section className="rounded-xl border border-violet-900/50 bg-[#1a0038] p-5 min-h-[255px] flex flex-col justify-between">
+          <div>
+            <h3 className="text-[38px] leading-none font-semibold">Country name</h3>
+            <ul className="mt-3 text-sm text-violet-100/85 list-disc list-inside space-y-1">
+              <li>Lorem ipsum dolor sit amet.</li>
+              <li>Consectetur adipiscing elit.</li>
+              <li>Volutpat ut laoreet magna.</li>
+            </ul>
+          </div>
+
+          <div className="flex items-center gap-4 mt-5">
+            <div className="w-28 h-28 rounded-full bg-[radial-gradient(circle_at_35%_30%,#ca8bff_0%,#8f4cff_50%,#2b1b71_100%)] flex items-center justify-center text-5xl font-black">
+              75%
+            </div>
+            <div>
+              <p className="text-3xl font-semibold">Economical details</p>
+              <p className="text-sm text-violet-200/80 mt-1">Balance: ${user.balance.toLocaleString()}</p>
+              {recent.map((tx) => (
+                <p key={tx.id} className="text-xs text-violet-100/80">{tx.type} - ${tx.amount.toLocaleString()}</p>
+              ))}
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );
