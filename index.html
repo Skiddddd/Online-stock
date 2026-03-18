@@ -678,6 +678,12 @@
         authError = "";
         authModalOpen = true;
         render();
+        setTimeout(() => {
+          const modal = document.getElementById("authModal");
+          if (modal) modal.scrollIntoView({ behavior: "smooth", block: "start" });
+          const email = document.getElementById("email");
+          if (email) email.focus();
+        }, 0);
       };
       const switchToRegisterBtn = document.getElementById("switchToRegister");
       if (switchToRegisterBtn) {
@@ -686,6 +692,12 @@
           authError = "";
           authModalOpen = true;
           render();
+          setTimeout(() => {
+            const modal = document.getElementById("authModal");
+            if (modal) modal.scrollIntoView({ behavior: "smooth", block: "start" });
+            const email = document.getElementById("email");
+            if (email) email.focus();
+          }, 0);
         };
       }
       const switchToLoginBtn = document.getElementById("switchToLogin");
@@ -695,6 +707,12 @@
           authError = "";
           authModalOpen = true;
           render();
+          setTimeout(() => {
+            const modal = document.getElementById("authModal");
+            if (modal) modal.scrollIntoView({ behavior: "smooth", block: "start" });
+            const email = document.getElementById("email");
+            if (email) email.focus();
+          }, 0);
         };
       }
       const closeAuthModal = document.getElementById("closeAuthModal");

@@ -1,5 +1,5 @@
-﻿
-import React, { useState, useEffect, useCallback } from 'react';
+
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { AppState, TransactionStatus, TransactionType, UserRole, SystemConfig } from './types';
 import { storageService } from './services/storageService';
 import { REMEMBERED_EMAIL_KEY } from './constants';
@@ -13,10 +13,17 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [loading, setLoading] = useState(false);
-  
-  // Withdrawal State
+    const [loading, setLoading] = useState(false);
+
+ = useRef<HTMLDivElement | null>(null);
+
+  const scrollToAuthCard = useCallback(() => {
+    requestAnimationFrame(() => {
+      authCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, []);
+
+
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState<number>(0);
   const [withdrawAddress, setWithdrawAddress] = useState('');
@@ -165,20 +172,35 @@ const App: React.FC = () => {
               <p className="mt-5 text-slate-300 max-w-xl text-lg leading-relaxed">
                 Build long-term crypto wealth on a secure platform with clear portfolio tracking, advanced tools, and fast execution.
               </p>
-              <button
-                type="button"
-                onClick={() => setIsRegistering(true)}
-                className="mt-8 px-8 py-3 rounded-2xl text-lg font-semibold bg-gradient-to-r from-cyan-400 to-teal-500 text-slate-900 shadow-[0_14px_45px_rgba(45,212,191,0.35)] hover:brightness-110 transition"
-              >
-                Invest now
-              </button>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsRegistering(true);
+                    scrollToAuthCard();
+                  }}
+                  className="px-8 py-3 rounded-2xl text-lg font-semibold bg-gradient-to-r from-cyan-400 to-teal-500 text-slate-900 shadow-[0_14px_45px_rgba(45,212,191,0.35)] hover:brightness-110 transition"
+                >
+                  Invest now
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsRegistering(false);
+                    scrollToAuthCard();
+                  }}
+                  className="px-7 py-3 rounded-2xl text-lg font-semibold border border-cyan-300/35 text-cyan-100 hover:bg-cyan-400/10 transition"
+                >
+                  Sign In
+                </button>
+              </div>
             </section>
 
             <section className="relative">
               <div className="hidden md:block absolute -top-20 right-10 w-72 h-72 rounded-full border border-cyan-300/40 bg-cyan-300/10 blur-[1px]"></div>
               <div className="hidden md:block absolute -top-8 right-20 w-52 h-52 rounded-full bg-gradient-to-b from-cyan-300/20 to-transparent shadow-[0_0_80px_rgba(34,211,238,0.35)]"></div>
 
-              <div className="glass border border-cyan-200/20 rounded-3xl p-6 md:p-8 backdrop-blur-md bg-slate-950/45 shadow-[0_25px_90px_rgba(8,47,73,0.7)]">
+              <div ref={authCardRef} className="glass border border-cyan-200/20 rounded-3xl p-6 md:p-8 backdrop-blur-md bg-slate-950/45 shadow-[0_25px_90px_rgba(8,47,73,0.7)]">
                 <h2 className="text-2xl font-bold mb-1">{isRegistering ? 'Create Account' : 'Sign In'}</h2>
                 <p className="text-slate-300 text-sm mb-6">
                   {isRegistering ? 'Join the platform and start investing today.' : 'Access your dashboard and portfolio instantly.'}
