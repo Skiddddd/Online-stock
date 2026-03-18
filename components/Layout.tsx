@@ -38,8 +38,11 @@ const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, activeTab, se
         <div className="flex-1 min-w-0 flex flex-col">
           <header className="h-[78px] bg-[#1a0038] border-b border-violet-900/50 px-5 md:px-8 flex items-center justify-between">
             <div className="flex items-center gap-4 min-w-0">
-              <button className="text-violet-200/90 hover:text-white" aria-label="Menu">
-                <i className="fas fa-ellipsis-v"></i>
+              <button
+                className="w-8 h-8 rounded-md flex items-center justify-center text-violet-200/90 hover:text-white hover:bg-white/10"
+                aria-label="Menu"
+              >
+                <span className="sr-only">Menu</span>
               </button>
               <div className="hidden sm:flex items-center h-10 bg-white rounded-full px-4 min-w-[260px] md:min-w-[360px]">
                 <i className="fas fa-search text-amber-500 text-xs mr-3"></i>
@@ -97,3 +100,4 @@ const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, activeTab, se
 };
 
 export default Layout;
+
