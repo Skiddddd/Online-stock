@@ -278,6 +278,7 @@ const App: React.FC = () => {
 
           <div className="mt-8 text-center text-xs text-slate-400">
             <p>Admin Email: admin@nexus.io</p>
+            <p className="mt-2 text-cyan-300/80">Deployment test marker: March 21, 2026</p>
             <p className="mt-2">&copy; 2026 Nexus Crypto Capital. Secured by Blockchain.</p>
           </div>
         </div>
@@ -511,3 +512,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+
