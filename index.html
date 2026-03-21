@@ -9,33 +9,79 @@
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
   <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css' referrerpolicy='no-referrer' />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    (() => {
+      const media = window.matchMedia('(prefers-color-scheme: light)');
+      const applyTheme = () => {
+        document.documentElement.dataset.theme = media.matches ? 'light' : 'dark';
+      };
+      applyTheme();
+      if (typeof media.addEventListener === 'function') {
+        media.addEventListener('change', applyTheme);
+      } else if (typeof media.addListener === 'function') {
+        media.addListener(applyTheme);
+      }
+    })();
+  </script>
   <style>
     :root {
+      color-scheme: dark light;
       --bg-base: #030712;
-      --bg-surface: #0b1220;
+      --bg-overlay: rgba(3, 7, 18, 0.48);
+      --bg-orb-a: rgba(56, 189, 248, 0.18);
+      --bg-orb-b: rgba(52, 211, 153, 0.16);
       --line: rgba(148, 163, 184, 0.2);
+      --grid-line: rgba(148, 163, 184, 0.08);
       --text-soft: #94a3b8;
+      --page-text: #e2e8f0;
       --brand-a: #38bdf8;
       --brand-b: #34d399;
+      --glass-from: rgba(15, 23, 42, 0.62);
+      --glass-to: rgba(7, 11, 24, 0.5);
+      --glass-border: rgba(148, 163, 184, 0.28);
+      --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 36px rgba(2, 6, 23, 0.35);
+      --surface-chip-bg: rgba(15, 23, 42, 0.5);
+      --surface-chip-border: rgba(148, 163, 184, 0.3);
+      --blob-a: rgba(37, 99, 235, 0.2);
+      --blob-b: rgba(16, 185, 129, 0.18);
+    }
+    html[data-theme="light"] {
+      --bg-base: #eef6ff;
+      --bg-overlay: rgba(255, 255, 255, 0.55);
+      --bg-orb-a: rgba(14, 165, 233, 0.18);
+      --bg-orb-b: rgba(16, 185, 129, 0.14);
+      --line: rgba(71, 85, 105, 0.16);
+      --grid-line: rgba(71, 85, 105, 0.08);
+      --text-soft: #475569;
+      --page-text: #0f172a;
+      --glass-from: rgba(255, 255, 255, 0.82);
+      --glass-to: rgba(241, 245, 249, 0.72);
+      --glass-border: rgba(148, 163, 184, 0.35);
+      --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72), 0 16px 40px rgba(148, 163, 184, 0.18);
+      --surface-chip-bg: rgba(255, 255, 255, 0.74);
+      --surface-chip-border: rgba(148, 163, 184, 0.35);
+      --blob-a: rgba(59, 130, 246, 0.18);
+      --blob-b: rgba(45, 212, 191, 0.16);
     }
     body {
       position: relative;
       overflow-x: hidden;
       background:
-        linear-gradient(rgba(3, 7, 18, 0.48), rgba(3, 7, 18, 0.48)),
-        radial-gradient(900px 520px at -8% -5%, rgba(56, 189, 248, 0.18), transparent 55%),
-        radial-gradient(780px 460px at 105% 110%, rgba(52, 211, 153, 0.16), transparent 58%),
+        linear-gradient(var(--bg-overlay), var(--bg-overlay)),
+        radial-gradient(900px 520px at -8% -5%, var(--bg-orb-a), transparent 55%),
+        radial-gradient(780px 460px at 105% 110%, var(--bg-orb-b), transparent 58%),
         var(--bg-base);
-      color: #e2e8f0;
+      color: var(--page-text);
       font-family: "Manrope", system-ui, sans-serif;
+      transition: background-color 220ms ease, color 220ms ease;
     }
     body::before {
       content: "";
       position: fixed;
       inset: 0;
       background-image:
-        linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
       background-size: 34px 34px;
       mask-image: radial-gradient(circle at center, black 35%, transparent 100%);
       pointer-events: none;
@@ -47,10 +93,10 @@
       letter-spacing: -0.02em;
     }
     .glass {
-      background: linear-gradient(160deg, rgba(15, 23, 42, 0.62), rgba(7, 11, 24, 0.5));
+      background: linear-gradient(160deg, var(--glass-from), var(--glass-to));
       backdrop-filter: blur(14px);
-      border: 1px solid rgba(148, 163, 184, 0.28);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 36px rgba(2, 6, 23, 0.35);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
     }
     .brand-title {
       background: linear-gradient(95deg, var(--brand-a), var(--brand-b));
@@ -99,8 +145,8 @@
       transition: background-color 9999s ease-out 0s;
     }
     .surface-chip {
-      background: rgba(15, 23, 42, 0.5);
-      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: var(--surface-chip-bg);
+      border: 1px solid var(--surface-chip-border);
     }
     @keyframes driftA {
       0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
@@ -130,7 +176,7 @@
       height: 280px;
       top: -70px;
       left: -50px;
-      background: rgba(37, 99, 235, 0.2);
+      background: var(--blob-a);
       animation: driftA 9s ease-in-out infinite;
     }
     .blob-b {
@@ -138,7 +184,7 @@
       height: 320px;
       right: -80px;
       bottom: -90px;
-      background: rgba(16, 185, 129, 0.18);
+      background: var(--blob-b);
       animation: driftB 11s ease-in-out infinite;
     }
     .page-motion {
@@ -1636,5 +1682,4 @@
   </script>
 </body>
 </html>
-
 
